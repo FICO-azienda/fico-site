@@ -62,7 +62,7 @@ const SCHEMA = {
     "Digital studio designing and developing websites and interactive experiences for businesses.",
   slogan: "Websites for a brighter tomorrow",
   url: SITE,
-  email: "ciao@fico.studio",
+  email: "ficolc78@gmail.com",
   areaServed: "Worldwide",
   knowsAbout: [
     "Web design",

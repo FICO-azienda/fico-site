@@ -128,8 +128,9 @@ pagina. Non serve toccare le animazioni.
 
 ## Da sistemare prima di pubblicare
 
-- **`ciao@fico.studio`** è un indirizzo segnaposto: va sostituito ovunque compare
-  (navigazione, CTA finale, footer) insieme al dominio in `src/app/layout.tsx`.
+- Il **dominio** è ancora `https://fico.studio` in `src/app/layout.tsx`
+  (`SITE`): serve per canonical e anteprime social, va messo quello vero.
+  L'indirizzo email è `ficolc78@gmail.com`, già corretto ovunque.
 - Il modulo di contatto non esiste: i pulsanti aprono il client di posta.
 - "Selected worlds" elenca **settori**, non clienti, e il testo lo dice: finché
   non ci sono lavori veri non va trasformato in un portfolio.

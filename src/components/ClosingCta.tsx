@@ -75,7 +75,7 @@ export default function ClosingCta() {
         <div className={`${styles.actions} reveal`}>
           <a
             className="btn btn--solid"
-            href="mailto:ciao@fico.studio?subject=Start%20a%20project"
+            href="mailto:ficolc78@gmail.com?subject=Start%20a%20project"
             data-cursor="open"
           >
             Start a project
@@ -92,8 +92,8 @@ export default function ClosingCta() {
             Contact us
           </a>
         </div>
-        <a className={`link ${styles.mail} reveal`} href="mailto:ciao@fico.studio" data-cursor="open">
-          ciao@fico.studio
+        <a className={`link ${styles.mail} reveal`} href="mailto:ficolc78@gmail.com" data-cursor="open">
+          ficolc78@gmail.com
         </a>
       </div>
     </section>

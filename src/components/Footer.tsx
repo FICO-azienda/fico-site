@@ -6,7 +6,7 @@ export default function Footer() {
       <div className={styles.inner}>
         <p className="eyebrow">FICO — Websites for a brighter tomorrow</p>
         <nav className={`eyebrow ${styles.links}`} aria-label="Footer">
-          <a className="link" href="mailto:ciao@fico.studio">Email</a>
+          <a className="link" href="mailto:ficolc78@gmail.com">Email</a>
           <a className="link" href="#studio">Studio</a>
           <a className="link" href="#worlds">Work</a>
         </nav>

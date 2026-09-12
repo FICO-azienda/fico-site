@@ -155,7 +155,7 @@ export default function Navigation() {
         <p className={`body ${styles.menuFoot}`}>
           FICO — digital studio.
           <br />
-          ciao@fico.studio
+          ficolc78@gmail.com
         </p>
       </div>
 
