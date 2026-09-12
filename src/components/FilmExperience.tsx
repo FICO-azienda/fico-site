@@ -99,7 +99,7 @@ export default function FilmExperience() {
       const cy = vh / 2 + (SEAM_LOGO.centerY - 0.5) * SEAM_LOGO.frameH * scale;
       logo.style.width = `${w}px`;
       logo.style.left = `${cx - w / 2}px`;
-      logo.style.top = `${cy - (w * 214) / 266 / 2}px`;
+      logo.style.top = `${cy - w / SEAM_LOGO.aspect / 2}px`;
     };
     placeSeamLogo();
 

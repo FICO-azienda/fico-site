@@ -59,6 +59,8 @@ export default function Worlds() {
             key={w.name}
             className={styles.bgShot}
             src={w.shot}
+            srcSet={`${w.shot.replace(".webp", "@sm.webp")} 960w, ${w.shot} 1920w`}
+            sizes="100vw"
             alt=""
             data-on={active === i}
             loading="lazy"

@@ -11,31 +11,31 @@ const SERVICES = [
     n: "01",
     name: "Web Design",
     desc: "Layout, typography and rhythm built around one business, drawn before a single line of code.",
-    shot: "/img/worlds/hospitality.webp",
+    shot: "/img/worlds/hospitality@portrait.webp",
   },
   {
     n: "02",
     name: "Web Development",
     desc: "Hand-written front-end, fast on every device, structured so the site can be edited without us.",
-    shot: "/img/worlds/services.webp",
+    shot: "/img/worlds/services@portrait.webp",
   },
   {
     n: "03",
     name: "Digital Identity",
     desc: "Colour, material and language carried from the physical business into the screen.",
-    shot: "/img/worlds/fashion.webp",
+    shot: "/img/worlds/fashion@portrait.webp",
   },
   {
     n: "04",
     name: "Interactive Experiences",
     desc: "Scroll-driven film, motion and three-dimensional detail — used only where they carry meaning.",
-    shot: "/img/worlds/local.webp",
+    shot: "/img/worlds/local@portrait.webp",
   },
   {
     n: "05",
     name: "E-commerce",
     desc: "Catalogue, checkout and logistics designed around the decision to buy, not around the software.",
-    shot: "/img/worlds/retail.webp",
+    shot: "/img/worlds/retail@portrait.webp",
   },
 ];
 

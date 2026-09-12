@@ -10,15 +10,19 @@ export const FILM_DURATION = 40.13;
 export const SEAM_START = 38.9;
 
 /**
- * Posizione del logo dentro il fotogramma finale, misurata sul file
- * (1280x720): serve a far combaciare il logo del sito con quello del video.
+ * Posizione del logo dentro il fotogramma finale (1280x720). I valori sono
+ * calcolati da scripts/seam-logo.mjs allineando il MARCHIO del file sorgente
+ * a quello del video: allinearsi sul riquadro totale sarebbe sbagliato,
+ * perche' nel video il claim e' sfocato e "sbava" di qualche pixel.
  */
 export const SEAM_LOGO = {
   frameW: 1280,
   frameH: 720,
-  centerX: 0.4988,
-  centerY: 0.4924,
-  width: 0.2078,
+  centerX: 0.49659,
+  centerY: 0.50069,
+  width: 0.20742,
+  /** proporzioni del file del logo, non del ritaglio sfocato del video */
+  aspect: 1.18,
 } as const;
 
 export type Placement =
