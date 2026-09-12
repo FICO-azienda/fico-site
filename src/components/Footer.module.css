@@ -1,0 +1,20 @@
+.footer {
+  background: var(--ivory);
+  color: var(--on-light);
+  padding: clamp(2.5rem, 5vh, 4rem) var(--pad) clamp(2rem, 4vh, 3rem);
+  border-top: 1px solid rgba(22, 54, 40, 0.16);
+}
+
+.inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6rem 3rem;
+  align-items: baseline;
+  justify-content: space-between;
+  color: var(--on-light-faint);
+}
+
+.links { display: flex; flex-wrap: wrap; gap: 1.8rem; }
+.links a { color: var(--on-light-dim); }

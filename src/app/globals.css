@@ -1,26 +1,260 @@
 @import "tailwindcss";
 
+/* =========================================================================
+   FICO — fondamenta
+   I colori non sono inventati: il verde e' quello del logo (#163628) e
+   l'avorio e' campionato dall'ultimo fotogramma del film (#FCF4DD), perche'
+   il passaggio dal video al sito deve avvenire senza alcuno stacco.
+   ========================================================================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --black: #050607;
+  --graphite: #14171a;
+  --green-abyss: #07100b;
+  --green-deep: #0c1d14;
+  --green: #163628;
+  --green-mid: #2f5341;
+  --green-pale: #7d9a88;
+  --ivory: #fcf4dd;
+  --ivory-deep: #f4e9cd;
+  --smoke: rgba(252, 244, 221, 0.08);
+
+  --on-dark: #ece7db;
+  --on-dark-dim: rgba(236, 231, 219, 0.56);
+  --on-dark-faint: rgba(236, 231, 219, 0.3);
+  --on-light: #163628;
+  --on-light-dim: rgba(22, 54, 40, 0.62);
+  --on-light-faint: rgba(22, 54, 40, 0.38);
+
+  --pad: clamp(1.5rem, 5vw, 7rem);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.33, 0, 0.15, 1);
+
+  --nav-h: 5.5rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--black);
+  color: var(--on-dark);
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-weight: 300;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+body.is-locked {
+  overflow: hidden;
+}
+
+img,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+}
+
+::selection {
+  background: var(--green);
+  color: var(--ivory);
+}
+
+:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 4px;
+}
+
+/* --------------------------------------------------------------- tipografia */
+
+.display {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 300;
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.d-xl { font-size: clamp(2.8rem, 9.5vw, 10.5rem); }
+.d-lg { font-size: clamp(2.4rem, 7vw, 7rem); }
+.d-md { font-size: clamp(1.9rem, 4.6vw, 4.2rem); }
+.d-sm { font-size: clamp(1.4rem, 2.6vw, 2.4rem); letter-spacing: -0.02em; line-height: 1.1; }
+
+.eyebrow {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(0.62rem, 0.78vw, 0.72rem);
+  font-weight: 400;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.body-lg {
+  font-size: clamp(1rem, 1.35vw, 1.2rem);
+  line-height: 1.62;
+  max-width: 46ch;
+  font-weight: 300;
+}
+
+.body {
+  font-size: clamp(0.92rem, 1.05vw, 1rem);
+  line-height: 1.68;
+  max-width: 52ch;
+  font-weight: 300;
+}
+
+/* ------------------------------------------------------------------ layout */
+
+.section {
+  position: relative;
+  padding: clamp(6rem, 14vh, 12rem) var(--pad);
+}
+
+.section--light {
+  background: var(--ivory);
+  color: var(--on-light);
+}
+
+.section--dark {
+  background: var(--green-abyss);
+  color: var(--on-dark);
+}
+
+.rule {
+  height: 1px;
+  border: 0;
+  margin: 0;
+  background: currentColor;
+  opacity: 0.14;
+}
+
+/* ------------------------------------------------------------------ bottoni */
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9em;
+  padding: 1.15em 2.3em;
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 0;
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 0.5s var(--ease);
+}
+
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: currentColor;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.55s var(--ease);
+}
+
+.btn:hover::after { transform: scaleY(1); }
+.section--light .btn:hover { color: var(--ivory); }
+.section--dark .btn:hover,
+.btn--on-dark:hover { color: var(--green-abyss); }
+
+.btn--solid {
+  background: var(--green);
+  color: var(--ivory);
+  border-color: var(--green);
+}
+.btn--solid::after { background: var(--ivory); }
+.btn--solid:hover { color: var(--green); }
+
+/* --------------------------------------------------------------- link sottili */
+
+.link {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.15em;
+}
+
+.link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.55s var(--ease);
+}
+
+.link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ------------------------------------------------------ ingressi progressivi */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+}
+
+.reveal-mask > span {
+  display: block;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

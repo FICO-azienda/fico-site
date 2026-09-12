@@ -1,0 +1,107 @@
+.services {
+  background: var(--ivory);
+  color: var(--on-light);
+  padding: clamp(5rem, 12vh, 9rem) var(--pad) clamp(7rem, 16vh, 13rem);
+}
+
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 7rem) 1fr;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  max-width: 1600px;
+  margin: 0 auto clamp(4rem, 10vh, 8rem);
+}
+
+.head p { color: var(--on-light-faint); padding-top: 0.9rem; }
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 6vw, 6rem);
+  max-width: 1600px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+/* pannello che resta fermo mentre la lista scorre */
+.media {
+  position: sticky;
+  top: calc(var(--nav-h) + 6vh);
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--green-abyss);
+}
+
+.shot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 1s var(--ease), transform 1.6s var(--ease);
+}
+
+.shot[data-on="true"] { opacity: 1; transform: scale(1); }
+
+.mediaEdge {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(252, 244, 221, 0.1);
+}
+
+.list { display: grid; }
+
+.item {
+  padding: clamp(2rem, 4vh, 3.2rem) 0;
+  border-top: 1px solid rgba(22, 54, 40, 0.16);
+  display: grid;
+  grid-template-columns: 3.4rem 1fr;
+  gap: 1.4rem;
+  align-items: baseline;
+  cursor: default;
+  transition: opacity 0.6s var(--ease);
+}
+
+.item:last-child { border-bottom: 1px solid rgba(22, 54, 40, 0.16); }
+
+.item[data-on="false"] { opacity: 0.32; }
+
+.num {
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  color: var(--on-light-faint);
+}
+
+.name {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 300;
+  font-size: clamp(1.7rem, 3.4vw, 3rem);
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  margin: 0 0 0.9rem;
+}
+
+.desc {
+  color: var(--on-light-dim);
+  font-size: clamp(0.9rem, 1vw, 1rem);
+  margin: 0;
+  max-width: 40ch;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+  .media {
+    position: relative;
+    top: 0;
+    aspect-ratio: 3 / 2;
+    margin-bottom: 2.5rem;
+  }
+  .head { grid-template-columns: 1fr; gap: 1rem; }
+  .head p { padding-top: 0; }
+  .item[data-on="false"] { opacity: 1; }
+}

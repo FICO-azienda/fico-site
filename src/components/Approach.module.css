@@ -1,0 +1,106 @@
+.approach {
+  background: var(--green-abyss);
+  color: var(--on-dark);
+}
+
+/* le due frasi si scambiano il posto mentre la sezione resta ferma */
+.statement {
+  position: relative;
+  height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 0 var(--pad);
+  overflow: hidden;
+}
+
+.glow {
+  position: absolute;
+  width: min(120vw, 1200px);
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(47, 83, 65, 0.42), transparent 62%);
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.phrase {
+  position: absolute;
+  text-align: center;
+  max-width: 22ch;
+  will-change: transform, opacity;
+}
+
+.phrase em { font-style: normal; color: var(--green-pale); }
+
+.steps {
+  padding: clamp(6rem, 14vh, 11rem) var(--pad) clamp(7rem, 16vh, 12rem);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.stepsHead {
+  display: grid;
+  grid-template-columns: minmax(0, 7rem) 1fr;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  margin-bottom: clamp(3.5rem, 9vh, 6rem);
+}
+
+.stepsHead p { color: var(--on-dark-faint); padding-top: 0.9rem; }
+
+.step {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 22rem) 1fr;
+  gap: clamp(1.2rem, 4vw, 4rem);
+  align-items: start;
+  padding: clamp(2rem, 4.5vh, 3.4rem) 0;
+  border-top: 1px solid rgba(236, 231, 219, 0.14);
+  position: relative;
+}
+
+.step:last-child { border-bottom: 1px solid rgba(236, 231, 219, 0.14); }
+
+/* riga che si disegna al passaggio: nessuna icona */
+.step::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -1px;
+  height: 1px;
+  width: 100%;
+  background: var(--green-pale);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.1s var(--ease);
+}
+
+.step[data-on="true"]::after { transform: scaleX(1); }
+
+.stepNum {
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  color: var(--on-dark-faint);
+  padding-top: 0.5rem;
+}
+
+.stepName {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 300;
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin: 0;
+}
+
+.stepText {
+  color: var(--on-dark-dim);
+  margin: 0;
+  max-width: 44ch;
+  line-height: 1.65;
+}
+
+@media (max-width: 900px) {
+  .step { grid-template-columns: 2.6rem 1fr; }
+  .stepText { grid-column: 2; margin-top: 0.9rem; }
+  .stepsHead { grid-template-columns: 1fr; gap: 1rem; }
+  .stepsHead p { padding-top: 0; }
+}

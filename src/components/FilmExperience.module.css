@@ -1,0 +1,230 @@
+.stage {
+  position: relative;
+  background: var(--black);
+}
+
+.viewport {
+  position: relative;
+  height: 100svh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--black);
+}
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+}
+
+.poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.8s var(--ease);
+}
+
+/* velo che tiene leggibile il testo senza spegnere l'immagine */
+.veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(100deg, rgba(5, 6, 7, 0.62) 0%, rgba(5, 6, 7, 0.14) 42%, transparent 68%),
+    linear-gradient(0deg, rgba(5, 6, 7, 0.55) 0%, transparent 38%);
+}
+
+.grain {
+  position: absolute;
+  inset: -50%;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 7s steps(5) infinite;
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-3%, 2%); }
+  50% { transform: translate(2%, -3%); }
+  75% { transform: translate(-2%, -2%); }
+}
+
+/* ------------------------------------------------------------- i capitoli */
+
+.chapters {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.chapter {
+  position: absolute;
+  max-width: min(92vw, 62rem);
+  will-change: opacity, transform;
+}
+
+.chapter p { margin: 0; }
+
+.lineMask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+}
+
+.line {
+  display: block;
+  will-change: transform, filter;
+}
+
+.chapterEyebrow {
+  color: var(--on-dark-faint);
+  margin-bottom: 1.6rem !important;
+}
+
+/* composizioni asimmetriche, mai tutto al centro */
+.corner       { top: calc(var(--nav-h) + 3vh); left: var(--pad); }
+.bottomLeft   { left: var(--pad); bottom: 11vh; }
+.rightMid     { right: var(--pad); top: 50%; transform: translateY(-50%); text-align: right; }
+.leftLow      { left: var(--pad); bottom: 16vh; }
+.rightHigh    { right: var(--pad); top: calc(var(--nav-h) + 10vh); text-align: right; }
+.leftMid      { left: var(--pad); top: 46%; transform: translateY(-50%); }
+.centerWide   { left: 50%; transform: translateX(-50%); bottom: 16vh; text-align: center; }
+.leftBig      { left: var(--pad); top: 42%; transform: translateY(-50%); }
+
+/* ------------------------------------------------------------- la giuntura */
+
+/*
+  L'ultimo fotogramma del film e' gia' il logo FICO su avorio: questo strato
+  ha esattamente lo stesso colore e il logo nella stessa identica posizione,
+  quindi puo' sostituire il video senza che si veda alcun cambio.
+*/
+.seam {
+  position: absolute;
+  inset: 0;
+  background: var(--ivory);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.seamLogo {
+  position: absolute;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.seamLogo img {
+  width: 100%;
+  height: auto;
+}
+
+/* -------------------------------------------------------- filo di avanzamento */
+
+.progress {
+  position: absolute;
+  left: var(--pad);
+  right: var(--pad);
+  bottom: 2.6vh;
+  height: 1px;
+  background: rgba(236, 231, 219, 0.16);
+  overflow: hidden;
+}
+
+.progressFill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--ivory);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.hint {
+  position: absolute;
+  right: var(--pad);
+  bottom: 5.4vh;
+  color: var(--on-dark-faint);
+  transition: opacity 0.6s var(--ease);
+}
+
+/* ------------------------------------------------------------------ mobile */
+
+@media (max-width: 820px) {
+  .chapter { max-width: min(88vw, 30rem); }
+  .rightMid, .rightHigh { text-align: left; right: auto; left: var(--pad); }
+  .rightMid { top: 42%; }
+  .rightHigh { top: calc(var(--nav-h) + 6vh); }
+  .centerWide { left: var(--pad); transform: none; text-align: left; }
+  .leftBig, .leftMid { top: 44%; }
+  .veil {
+    background:
+      linear-gradient(180deg, rgba(5, 6, 7, 0.55) 0%, transparent 30%),
+      linear-gradient(0deg, rgba(5, 6, 7, 0.7) 0%, transparent 45%);
+  }
+}
+
+/* --------------------------------------------------- animazioni disattivate */
+
+.static .video { position: relative; height: 100svh; }
+
+/* -------------------------------------------------------------------------
+   Animazioni ridotte: niente pin, niente scrub, niente sovrapposizioni.
+   Il film diventa un fotogramma fermo e i capitoli si leggono in colonna.
+   ------------------------------------------------------------------------- */
+.stage[data-static="true"] .viewport {
+  height: auto;
+  min-height: 0;
+  padding-bottom: clamp(4rem, 10vh, 8rem);
+}
+
+.stage[data-static="true"] .video,
+.stage[data-static="true"] .seam,
+.stage[data-static="true"] .seamLogo,
+.stage[data-static="true"] .progress,
+.stage[data-static="true"] .hint,
+.stage[data-static="true"] .grain {
+  display: none;
+}
+
+.stage[data-static="true"] .poster {
+  position: relative;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  opacity: 1 !important;
+}
+
+.stage[data-static="true"] .veil {
+  position: absolute;
+  inset: 0;
+  height: 56.25vw;
+  max-height: 100%;
+}
+
+.stage[data-static="true"] .chapters {
+  position: static;
+  display: grid;
+  gap: clamp(3rem, 8vh, 6rem);
+  padding: clamp(4rem, 10vh, 7rem) var(--pad) 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.stage[data-static="true"] .chapter {
+  position: static;
+  transform: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  max-width: none;
+  text-align: left;
+}
+
+.stage[data-static="true"] .line {
+  transform: none !important;
+  filter: none !important;
+  letter-spacing: -0.035em !important;
+}

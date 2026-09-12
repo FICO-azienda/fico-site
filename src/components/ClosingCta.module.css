@@ -1,0 +1,58 @@
+.closing { position: relative; }
+
+/* prima frase su nero, seconda mentre il fondo diventa avorio */
+.stage {
+  position: relative;
+  height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 0 var(--pad);
+  background: var(--black);
+  overflow: hidden;
+}
+
+.wash {
+  position: absolute;
+  inset: 0;
+  background: var(--ivory);
+  opacity: 0;
+}
+
+.phrase {
+  position: absolute;
+  text-align: center;
+  max-width: 20ch;
+  color: var(--on-dark);
+  will-change: transform, opacity;
+}
+
+.phraseLight { color: var(--on-light); }
+
+.outro {
+  background: var(--ivory);
+  color: var(--on-light);
+  padding: clamp(5rem, 12vh, 9rem) var(--pad) clamp(6rem, 14vh, 10rem);
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 2.2rem;
+}
+
+.lockup { width: clamp(108px, 13vw, 168px); height: auto; }
+
+.line { color: var(--on-light-dim); max-width: 40ch; margin: 0; }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.4rem;
+}
+
+.mail {
+  margin-top: 2.6rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.1rem, 2.2vw, 1.8rem);
+  letter-spacing: -0.01em;
+}

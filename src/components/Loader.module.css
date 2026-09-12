@@ -1,0 +1,41 @@
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: var(--black);
+  display: grid;
+  place-items: center;
+}
+
+.inner {
+  display: grid;
+  justify-items: center;
+  gap: 2.2rem;
+}
+
+.mark {
+  width: 34px;
+  opacity: 0;
+  filter: brightness(0) invert(0.92);
+}
+
+.bar {
+  width: min(180px, 40vw);
+  height: 1px;
+  background: rgba(236, 231, 219, 0.16);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--ivory);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.word {
+  color: var(--on-dark-faint);
+  opacity: 0;
+}
