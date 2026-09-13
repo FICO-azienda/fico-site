@@ -82,6 +82,15 @@ export default async function CaseStudy({
           </section>
         ))}
 
+        <div className={c.gallery}>
+          {project.shots.map((shot) => (
+            <figure key={shot.src} className={`${c.galleryItem} ${shot.kind === "mobile" ? c.galleryMobile : ""}`}>
+              <img src={shot.src} alt={`${project.name} — ${shot.label}`} loading="lazy" decoding="async" />
+              <figcaption>{shot.label}</figcaption>
+            </figure>
+          ))}
+        </div>
+
         {project.url && (
           <div className={c.tail}>
             <a className="btn btn--solid magnetic" href={project.url} target="_blank" rel="noreferrer" data-cursor="open">

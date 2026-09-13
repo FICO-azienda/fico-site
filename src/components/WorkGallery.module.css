@@ -1,0 +1,102 @@
+/* Vetrina dei lavori: schermate vere del sito del cliente, su nero.
+   Il nero non è decorativo — è quello che fa risaltare le catture, che sono
+   quasi tutte chiare o calde. */
+
+.band {
+  position: relative;
+  margin: clamp(2rem, 5vh, 3.5rem) 0 clamp(2.5rem, 6vh, 4rem);
+  overflow: hidden;
+  /* le schermate sfumano ai bordi invece di essere tagliate di netto */
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+.track {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(1rem, 2vw, 1.8rem);
+  width: max-content;
+  will-change: transform;
+}
+
+.shot {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  background: #0b0b0c;
+  border: 1px solid rgba(236, 231, 219, 0.14);
+  transition: border-color 0.5s var(--ease), transform 0.7s var(--ease);
+}
+
+.shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+
+.desktop { width: clamp(19rem, 30vw, 30rem); aspect-ratio: 16 / 10; }
+.mobile { width: clamp(7.5rem, 11vw, 10.5rem); aspect-ratio: 9 / 17; }
+
+.band:hover .shot { border-color: rgba(236, 231, 219, 0.24); }
+
+.caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0.55rem 0.8rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--on-dark-dim);
+  background: linear-gradient(0deg, rgba(5, 6, 7, 0.86), transparent);
+  opacity: 0;
+  transition: opacity 0.45s var(--ease);
+}
+
+.shot:hover .caption { opacity: 1; }
+
+/* ------------------------------------------------------------ didascalia */
+
+.foot {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: end;
+  padding-top: clamp(1.5rem, 4vh, 2.4rem);
+  border-top: 1px solid rgba(236, 231, 219, 0.16);
+}
+
+.identity { display: flex; align-items: center; gap: 1.1rem; }
+
+.badge {
+  width: clamp(2.6rem, 4vw, 3.4rem);
+  height: auto;
+  flex: none;
+  /* il marchio del cliente è verde petrolio: su nero va schiarito appena */
+  filter: brightness(1.25);
+}
+
+.name {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 300;
+  font-size: clamp(1.6rem, 3.4vw, 2.8rem);
+  letter-spacing: -0.035em;
+  line-height: 1;
+  margin: 0 0 0.35rem;
+}
+
+.meta { font-size: 0.8rem; color: var(--on-dark-faint); margin: 0; }
+
+.short {
+  margin: 1.4rem 0 0;
+  max-width: 52ch;
+  color: var(--on-dark-dim);
+  font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+  line-height: 1.62;
+  grid-column: 1;
+}
+
+.actions { display: flex; flex-wrap: wrap; gap: 0.9rem; }
+
+@media (max-width: 860px) {
+  .foot { grid-template-columns: 1fr; align-items: start; gap: 1.6rem; }
+  .band { mask-image: linear-gradient(90deg, #000 88%, transparent); -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); }
+}

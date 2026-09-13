@@ -88,3 +88,34 @@
   .introPlate { aspect-ratio: 16 / 10; }
   .introPlate img { max-width: 8rem; }
 }
+
+/* galleria: le schermate vere del sito, com'è oggi */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: clamp(1rem, 2vw, 1.6rem);
+  margin: clamp(2rem, 6vh, 4rem) 0;
+}
+
+.galleryItem {
+  margin: 0;
+  overflow: hidden;
+  background: #0b0b0c;
+  border: 1px solid rgba(22, 54, 40, 0.16);
+}
+
+.galleryItem img { display: block; width: 100%; height: auto; }
+
+.galleryItem figcaption {
+  padding: 0.7rem 0.9rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--on-light-faint);
+  background: var(--ivory);
+}
+
+/* le catture da telefono sono strette: due per riga invece di una larga */
+.galleryMobile { grid-column: span 1; }
+.galleryMobile img { max-height: 42rem; object-fit: cover; object-position: top center; }

@@ -34,12 +34,17 @@ export default async function WorkIndex({ params }: { params: Promise<{ lang: st
           const copy = project.copy[lang];
           return (
             <article key={project.slug} className={`${w.card} ${w.onLight}`}>
-              <div className={w.plate} style={{ background: project.plate }}>
-                <img src={project.logo} alt={project.name} />
+              <div className={w.shot}>
+                <img src={project.shots[0].src} alt={`${project.name} — ${project.shots[0].label}`} loading="lazy" decoding="async" />
               </div>
               <div>
-                <h2 className={w.name}>{project.name}</h2>
-                <p className={w.meta}>{copy.sector} · {project.year}</p>
+                <div className={w.identity}>
+                  <img className={w.badge} src={project.logo} alt="" aria-hidden="true" />
+                  <div>
+                    <h2 className={w.name}>{project.name}</h2>
+                    <p className={w.meta}>{copy.sector} · {project.year}</p>
+                  </div>
+                </div>
                 <p className={w.short}>{copy.short}</p>
                 <div className={w.actions}>
                   {project.url && (

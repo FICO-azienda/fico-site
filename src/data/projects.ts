@@ -28,7 +28,8 @@ export interface Project {
   logo: string;
   /** tinta della targa su cui poggia il logo */
   plate: string;
-  shots: string[];
+  /** catture reali del sito dal vivo, generate da scripts/shots.mjs */
+  shots: { src: string; kind: "desktop" | "mobile"; label: string }[];
   copy: Record<Locale, ProjectCopy>;
 }
 
@@ -40,7 +41,14 @@ export const PROJECTS: Project[] = [
     url: "https://fico-azienda.github.io/cerariacicogna/",
     logo: "/img/work/cereria-logo.png",
     plate: "#f2efe6",
-    shots: ["/img/worlds/food.webp", "/img/worlds/luxury.webp"],
+    shots: [
+      { src: "/img/work/cereria/home-desktop.webp", kind: "desktop", label: "Home" },
+      { src: "/img/work/cereria/garden-mobile.webp", kind: "mobile", label: "Garden" },
+      { src: "/img/work/cereria/storia-desktop.webp", kind: "desktop", label: "Chi siamo" },
+      { src: "/img/work/cereria/collection-desktop.webp", kind: "desktop", label: "Home Collection" },
+      { src: "/img/work/cereria/liturgico-mobile.webp", kind: "mobile", label: "Liturgico" },
+      { src: "/img/work/cereria/contatti-desktop.webp", kind: "desktop", label: "Contatti" },
+    ],
     copy: {
       it: {
         sector: "Industria ceraria artigiana — Novate Milanese",
@@ -59,7 +67,7 @@ export const PROJECTS: Project[] = [
           },
           {
             label: "Come è fatto",
-            text: "Trentotto pagine scritte a mano, veloci da telefono. Il modulo contatti invia due email automatiche, anche in inglese, e un assistente di catalogo risponde sui prodotti attingendo al listino reale.",
+            text: "Trentotto pagine scritte a mano, in italiano e in inglese, veloci da telefono. Il modulo contatti invia due email automatiche e un assistente di catalogo risponde sui prodotti attingendo al listino reale.",
           },
         ],
       },
@@ -80,7 +88,7 @@ export const PROJECTS: Project[] = [
           },
           {
             label: "How it's built",
-            text: "Thirty-eight hand-written pages, fast on a phone. The contact form sends two automatic emails, in English too, and a catalogue assistant answers product questions from the real price list.",
+            text: "Thirty-eight hand-written pages, in Italian and English, fast on a phone. The contact form sends two automatic emails and a catalogue assistant answers product questions from the real price list.",
           },
         ],
       },

@@ -5,7 +5,7 @@ import Loader from "@/components/Loader";
 import FilmExperience from "@/components/FilmExperience";
 import Services from "@/components/Services";
 import Worlds from "@/components/Worlds";
-import WorkTeaser from "@/components/WorkTeaser";
+import WorkGallery from "@/components/WorkGallery";
 import Approach from "@/components/Approach";
 import Pricing from "@/components/Pricing";
 import Team from "@/components/Team";
@@ -25,7 +25,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
       <FilmExperience dict={dict} />
       <Services dict={dict} />
       <Worlds dict={dict} />
-      <WorkTeaser locale={lang} dict={dict} />
+      <WorkGallery locale={lang} dict={dict} />
       <Approach dict={dict} />
       <Pricing dict={dict} />
       <Team dict={dict} />

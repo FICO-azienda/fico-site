@@ -46,9 +46,30 @@ Per rigenerare tutto dai sorgenti:
 
 ```bash
 node scripts/media.mjs     # monta, riencoda, poster, logo della giuntura, audio
-node scripts/stills.mjs    # fotogrammi per "Selected worlds", favicon, og
+node scripts/stills.mjs    # fotogrammi per i settori, favicon, og
 node scripts/split-logo.mjs   # marchio, parola e lockup su fondo trasparente
 ```
+
+## Catture dei siti dei clienti
+
+Le schermate in vetrina non sono mockup: sono catture del sito **dal vivo**,
+generate con un browser senza interfaccia.
+
+```bash
+node scripts/shots.mjs
+```
+
+Punta all'indirizzo pubblico del sito, scorre la pagina e torna in cima prima
+di scattare — altrimenti le animazioni legate allo scroll lasciano mezzo
+contenuto invisibile — e salva desktop (1600px) e telefono (600px) in
+`public/img/work/<cliente>/`. Per un nuovo cliente si cambiano `BASE` e l'elenco
+delle pagine in cima allo script.
+
+Il logo del cliente si prepara con `node scripts/client-logo.mjs`. Attenzione a
+un dettaglio che costa tempo: alcuni file **hanno già la trasparenza**, con il
+nero sotto i pixel invisibili. Scontornarli presumendo un fondo bianco rende
+opaco quel nero e il logo finisce dentro un riquadro scuro. Lo script controlla
+prima se l'alpha c'è e in quel caso non lo tocca.
 
 I percorsi dei sorgenti stanno in cima a `scripts/media.mjs`.
 
