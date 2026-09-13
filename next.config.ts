@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Sito interamente statico: si pubblica su qualsiasi hosting (Vercel,
-  // Netlify, GitHub Pages) senza bisogno di un server Node.
-  output: "export",
+  // Non più un export statico: l'invio delle due email (richiesta allo studio
+  // e conferma al cliente) ha bisogno di una funzione lato server, quindi il
+  // sito va pubblicato su Vercel.
   images: { unoptimized: true },
   reactStrictMode: true,
   devIndicators: false,

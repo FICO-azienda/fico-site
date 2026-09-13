@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import styles from "./Worlds.module.css";
 import { isLightDevice } from "@/animations/scroll";
 import { useReveal } from "@/lib/useReveal";
+import type { Dict } from "@/i18n/dictionaries";
 
 /*
   Settori in cui lo studio puo' lavorare: non sono clienti, non sono lavori
@@ -22,11 +23,12 @@ const WORLDS = [
   { name: "Local businesses", tag: "The shop on your street", shot: "/img/worlds/local.webp" },
 ];
 
-export default function Worlds() {
+export default function Worlds({ dict }: { dict: Dict }) {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
   const [touch, setTouch] = useState(false);
   useReveal(root);
+  const names = dict.sectors.items;
 
   useEffect(() => {
     setTouch(isLightDevice());
@@ -72,17 +74,10 @@ export default function Worlds() {
 
       <div className={styles.inner}>
         <div className={styles.head}>
-          <p className="eyebrow reveal">Selected worlds</p>
+          <p className="eyebrow reveal">{dict.sectors.eyebrow}</p>
           <div>
-            <h2 className="display d-md reveal">
-              The kinds of business
-              <br />
-              we build for.
-            </h2>
-            <p className={`body ${styles.note} reveal`}>
-              FICO is a young studio: these are the worlds we are equipped to work in,
-              not a list of past clients. The film above is our own work.
-            </p>
+            <h2 className="display d-md reveal">{dict.sectors.title}</h2>
+            <p className={`body ${styles.note} reveal`}>{dict.sectors.note}</p>
           </div>
         </div>
 
@@ -96,8 +91,8 @@ export default function Worlds() {
               data-cursor="explore"
             >
               <span className={styles.idx}>{String(i + 1).padStart(2, "0")}</span>
-              <h3 className={styles.name}>{w.name}</h3>
-              <span className={styles.tag}>{w.tag}</span>
+              <h3 className={styles.name}>{names[i] ?? w.name}</h3>
+              
             </div>
           ))}
         </div>

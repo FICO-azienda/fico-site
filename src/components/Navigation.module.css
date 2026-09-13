@@ -43,8 +43,8 @@
 
 .links {
   display: flex;
-  gap: 2.6rem;
-  margin-left: auto;
+  gap: 2.4rem;
+  margin-left: 3rem;
   align-items: center;
 }
 
@@ -59,8 +59,43 @@
 
 .links a:hover { opacity: 1; }
 
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  margin-left: auto;
+}
+
+.langs { display: flex; gap: 0.55rem; align-items: center; opacity: 0.85; }
+
+.lang {
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  color: currentColor;
+  opacity: 0.42;
+  transition: opacity 0.35s var(--ease);
+}
+
+.lang[data-on="true"] { opacity: 1; }
+.lang:hover { opacity: 1; }
+
+.quote {
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.85em 1.5em;
+  border: 1px solid currentColor;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.45s var(--ease), color 0.45s var(--ease);
+}
+
+.nav[data-on="light"] .quote:hover { background: var(--green); color: var(--ivory); border-color: var(--green); }
+.nav[data-on="dark"] .quote:hover { background: var(--ivory); color: var(--green-abyss); border-color: var(--ivory); }
+
 .sound {
-  margin-left: 2.6rem;
   display: flex;
   align-items: center;
   gap: 0.55rem;
@@ -163,9 +198,39 @@
 
 .menu[data-open="true"] .menuFoot { opacity: 1; }
 
-@media (max-width: 860px) {
+.menuFoot {
+  margin-top: 3.4rem;
+  color: var(--on-dark-dim);
+  opacity: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4rem 2.4rem;
+  align-items: center;
+  font-size: 0.9rem;
+  transition: opacity 0.6s var(--ease) 0.48s;
+}
+
+.menuLinks button {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 300;
+  font-size: clamp(2.4rem, 12vw, 4rem);
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  text-align: left;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.6s var(--ease), transform 0.7s var(--ease);
+}
+
+.menu[data-open="true"] .menuLinks button { opacity: 1; transform: none; transition-delay: 0.46s; }
+
+@media (max-width: 1080px) {
   .links { display: none; }
-  .sound { display: none; }
+}
+
+@media (max-width: 860px) {
+  .tools { display: none; }
   .toggle { display: block; }
   .nav[data-menu="true"] { color: var(--on-dark); }
 }

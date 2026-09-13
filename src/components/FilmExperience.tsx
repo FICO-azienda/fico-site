@@ -14,6 +14,8 @@ import {
 } from "@/lib/film";
 import { createVideoScrub, type ScrubHandle } from "@/animations/videoScrub";
 import { isLightDevice, prefersReducedMotion } from "@/animations/scroll";
+import { openAskFico } from "./AskFico";
+import type { Dict } from "@/i18n/dictionaries";
 
 const PLACE: Record<Chapter["place"], string> = {
   corner: styles.corner,
@@ -30,7 +32,7 @@ const PLACE: Record<Chapter["place"], string> = {
 const SCROLL_SCREENS_DESKTOP = 7;
 const SCROLL_SCREENS_LIGHT = 4.5;
 
-export default function FilmExperience() {
+export default function FilmExperience({ dict }: { dict: Dict }) {
   const root = useRef<HTMLDivElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -40,6 +42,7 @@ export default function FilmExperience() {
   const progressRef = useRef<HTMLSpanElement>(null);
   const hintRef = useRef<HTMLParagraphElement>(null);
   const chapterRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -172,6 +175,14 @@ export default function FilmExperience() {
         invalidateOnRefresh: true,
         onUpdate: (self) => {
           const p = self.progress;
+          // la proposta di valore resta leggibile a schermo fermo e si ritira
+          // appena l'utente entra davvero nel film
+          if (heroRef.current) {
+            const out = gsap.utils.clamp(0, 1, p / 0.05);
+            heroRef.current.style.opacity = String(1 - out);
+            heroRef.current.style.transform = `translate3d(0, ${-out * 28}px, 0)`;
+            heroRef.current.style.pointerEvents = out > 0.5 ? "none" : "auto";
+          }
           if (progressRef.current) progressRef.current.style.transform = `scaleX(${p})`;
           if (hintRef.current) hintRef.current.style.opacity = String(Math.max(0, 1 - p * 8));
 
@@ -216,6 +227,23 @@ export default function FilmExperience() {
         <div className={styles.veil} aria-hidden="true" />
         <div className={styles.grain} aria-hidden="true" />
 
+        <div ref={heroRef} className={styles.hero}>
+          <p className={`eyebrow ${styles.heroEyebrow}`}>{dict.hero.eyebrow}</p>
+          <h1 className={`display d-lg ${styles.heroTitle}`}>{dict.hero.title}</h1>
+          <p className={styles.heroSub}>{dict.hero.sub}</p>
+          <div className={styles.heroActions}>
+            <button className="btn btn--solid magnetic" onClick={openAskFico} data-cursor="open">
+              {dict.hero.ctaPrimary}
+            </button>
+            <a className="btn btn--on-dark magnetic" href="#work" data-cursor="explore">
+              {dict.hero.ctaSecondary}
+            </a>
+          </div>
+          <a className={`eyebrow ${styles.heroSkip}`} href="#services" data-cursor="explore">
+            {dict.hero.skip}
+          </a>
+        </div>
+
         <div className={styles.chapters}>
           {CHAPTERS.map((c, i) => (
             <div
@@ -228,7 +256,7 @@ export default function FilmExperience() {
             >
               {c.eyebrow && <p className={`eyebrow ${styles.chapterEyebrow}`}>{c.eyebrow}</p>}
               <h2 className={`display ${c.size}`}>
-                {c.lines.map((line, k) => (
+                {(dict.film.chapters[i] ?? []).map((line, k) => (
                   <span className={styles.lineMask} key={k}>
                     <span className={styles.line}>{line}</span>
                   </span>
@@ -247,7 +275,7 @@ export default function FilmExperience() {
         <div className={styles.progress} aria-hidden="true">
           <span ref={progressRef} className={styles.progressFill} />
         </div>
-        <p ref={hintRef} className={`eyebrow ${styles.hint}`}>Scroll</p>
+        <p ref={hintRef} className={`eyebrow ${styles.hint}`}>{dict.hero.scroll}</p>
       </div>
     </section>
   );

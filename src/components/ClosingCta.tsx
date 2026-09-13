@@ -4,10 +4,12 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import styles from "./ClosingCta.module.css";
-import { prefersReducedMotion, scrollToId } from "@/animations/scroll";
+import { prefersReducedMotion } from "@/animations/scroll";
 import { useReveal } from "@/lib/useReveal";
+import { openAskFico } from "./AskFico";
+import type { Dict } from "@/i18n/dictionaries";
 
-export default function ClosingCta() {
+export default function ClosingCta({ dict }: { dict: Dict }) {
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const wash = useRef<HTMLSpanElement>(null);
@@ -52,49 +54,29 @@ export default function ClosingCta() {
     <section ref={root} id="contact" className={styles.closing} data-surface="dark">
       <div ref={stage} className={styles.stage}>
         <span ref={wash} className={styles.wash} aria-hidden="true" />
-        <h2 ref={first} className={`display d-xl ${styles.phrase}`}>
-          Your business
-          <br />
-          already has
-          <br />
-          a story.
+        <h2 ref={first} className={`display d-xl ${styles.phrase}`} style={{ whiteSpace: "pre-line" }}>
+          {dict.contact.phrase1}
         </h2>
-        <h2 ref={second} className={`display d-xl ${styles.phrase}`}>
-          We give it
-          <br />
-          a digital world.
+        <h2 ref={second} className={`display d-xl ${styles.phrase}`} style={{ whiteSpace: "pre-line" }}>
+          {dict.contact.phrase2}
         </h2>
       </div>
 
       <div className={styles.outro} data-surface="light">
         <img className={`${styles.lockup} reveal`} src="/img/fico-lockup.png" alt="FICO" />
-        <p className={`body-lg ${styles.line} reveal`}>
-          Tell us about your business — what it makes, who it is for, where it is going.
-          We will tell you honestly whether we are the right studio for it.
-        </p>
+        <h2 className={`display d-md reveal`} style={{ whiteSpace: "pre-line", margin: "0" }}>
+          {dict.contact.title}
+        </h2>
+        <p className={`body-lg ${styles.line} reveal`}>{dict.contact.sub}</p>
         <div className={`${styles.actions} reveal`}>
-          <a
-            className="btn btn--solid"
-            href="mailto:ficolc78@gmail.com?subject=Start%20a%20project"
-            data-cursor="open"
-          >
-            Start a project
-          </a>
-          <a
-            className="btn"
-            href="#studio"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToId("#studio");
-            }}
-            data-cursor="explore"
-          >
-            Contact us
-          </a>
+          <button className="btn btn--solid magnetic" onClick={openAskFico} data-cursor="open">
+            {dict.contact.cta}
+          </button>
         </div>
-        <a className={`link ${styles.mail} reveal`} href="mailto:ficolc78@gmail.com" data-cursor="open">
-          ficolc78@gmail.com
-        </a>
+        <p className={`${styles.mail} reveal`} style={{ color: "var(--on-light-dim)", fontSize: "0.9rem" }}>
+          {dict.contact.or}{" "}
+          <a className="link" href="mailto:ficolc78@gmail.com" data-cursor="open">ficolc78@gmail.com</a>
+        </p>
       </div>
     </section>
   );

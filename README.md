@@ -4,7 +4,7 @@ Sito immersivo dello studio FICO. Non è un sito con un video di sfondo: il film
 **è** la prima parte del sito, scorre sotto il dito dell'utente e alla fine si
 trasforma nella pagina vera senza che si veda uno stacco.
 
-Next.js 16 · React 19 · TypeScript · GSAP ScrollTrigger · Lenis · export statico.
+Next.js 16 · React 19 · TypeScript · GSAP ScrollTrigger · Lenis · italiano e inglese.
 
 ---
 
@@ -128,9 +128,16 @@ pagina. Non serve toccare le animazioni.
 
 ## Da sistemare prima di pubblicare
 
-- Il **dominio** è ancora `https://fico.studio` in `src/app/layout.tsx`
-  (`SITE`): serve per canonical e anteprime social, va messo quello vero.
-  L'indirizzo email è `ficolc78@gmail.com`, già corretto ovunque.
-- Il modulo di contatto non esiste: i pulsanti aprono il client di posta.
-- "Selected worlds" elenca **settori**, non clienti, e il testo lo dice: finché
-  non ci sono lavori veri non va trasformato in un portfolio.
+- **Dominio.** Manca. Serve per due cose: l'indirizzo del sito (ora c'è il
+  segnaposto `fico.studio`, in `NEXT_PUBLIC_SITE_URL`) e la verifica su Resend,
+  senza la quale le email di conferma finiscono in spam.
+- **Informativa privacy.** È una bozza costruita su come funziona il sito oggi
+  e lo dichiara apertamente in cima alla pagina. Mancano denominazione legale,
+  forma giuridica, partita IVA e sede. Va fatta verificare da un professionista.
+- **Nessun tracciamento installato**, quindi nessun banner cookie. Se un giorno
+  si aggiunge un sistema di statistiche, servirà entrambi.
+- **Cereria Cicogna**: l'indirizzo del sito nel caso studio è quello di GitHub
+  Pages. Se il progetto passa a un dominio proprio, va aggiornato in
+  `src/data/projects.ts`.
+- Il paragrafo **«Risultato»** del caso studio è volutamente assente: non ci
+  sono ancora numeri veri e non ne sono stati inventati.

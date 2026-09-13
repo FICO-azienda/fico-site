@@ -1,0 +1,15 @@
+.page { background: var(--ivory); color: var(--on-light); min-height: 100svh; }
+
+.head {
+  padding: calc(var(--nav-h) + clamp(4rem, 12vh, 8rem)) var(--pad) clamp(3rem, 8vh, 5rem);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.eyebrowRow { display: flex; gap: 1.6rem; align-items: baseline; color: var(--on-light-faint); margin-bottom: 1.8rem; }
+
+.title { margin: 0; max-width: 20ch; }
+
+.lede { margin: 1.8rem 0 0; max-width: 46ch; color: var(--on-light-dim); font-size: clamp(1rem, 1.4vw, 1.2rem); line-height: 1.6; }
+
+.body { padding: 0 var(--pad) clamp(5rem, 12vh, 9rem); max-width: 1600px; margin: 0 auto; }
