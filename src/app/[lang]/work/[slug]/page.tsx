@@ -18,7 +18,7 @@ export async function generateMetadata({
   const { lang, slug } = await params;
   const project = getProject(slug);
   if (!isLocale(lang) || !project) return {};
-  return { title: project.name, description: project.copy[lang].tagline };
+  return { title: project.name, description: project.copy[lang].short };
 }
 
 export default async function CaseStudy({
@@ -32,28 +32,41 @@ export default async function CaseStudy({
   const d = getDict(lang);
   const copy = project.copy[lang];
 
-  const blocks = [
-    { label: d.work.challenge, text: copy.challenge },
-    { label: d.work.idea, text: copy.idea },
-    { label: d.work.design, text: copy.design },
-    { label: d.work.build, text: copy.build },
-    ...(copy.result ? [{ label: "Risultato", text: copy.result }] : []),
-  ];
-
   return (
     <main className={p.page} data-surface="light">
+      {/*
+        Pagina volutamente breve. Chi arriva qui vuole capire in mezzo minuto
+        di cosa si tratta e poi vedere il sito vero: il pulsante per entrare
+        sta in alto, non in fondo, e si ripete alla fine.
+      */}
       <div className={p.head}>
         <p className={`eyebrow ${p.eyebrowRow}`}>
           <span>{d.work.eyebrow}</span>
           <span>{project.year}</span>
         </p>
-        <h1 className={`display d-lg ${p.title}`}>{project.name}</h1>
-        <p className={p.lede}>{copy.tagline}</p>
-      </div>
 
-      <figure className={c.cover}>
-        <img src={project.cover} alt="" />
-      </figure>
+        <div className={c.intro}>
+          <div className={c.introPlate} style={{ background: project.plate }}>
+            <img src={project.logo} alt={project.name} />
+          </div>
+          <div>
+            <h1 className={`display d-lg ${p.title}`}>{project.name}</h1>
+            <p className={p.lede}>{copy.short}</p>
+            {project.url && (
+              <a
+                className="btn btn--solid magnetic"
+                href={project.url}
+                target="_blank"
+                rel="noreferrer"
+                data-cursor="open"
+                style={{ marginTop: "2.2rem" }}
+              >
+                {d.work.visit}
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
 
       <div className={p.body}>
         <dl className={c.facts}>
@@ -62,22 +75,19 @@ export default async function CaseStudy({
           <div><dt>{d.work.year}</dt><dd>{project.year}</dd></div>
         </dl>
 
-        {blocks.map((b, i) => (
+        {copy.blocks.map((b) => (
           <section className={c.block} key={b.label}>
             <p className={c.blockLabel}>{b.label}</p>
             <p className={c.blockText}>{b.text}</p>
-            {project.shots[i] && (
-              <figure className={c.shot}>
-                <img src={project.shots[i]} alt="" loading="lazy" decoding="async" />
-              </figure>
-            )}
           </section>
         ))}
 
         {project.url && (
-          <a className="btn btn--solid" href={project.url} target="_blank" rel="noreferrer" data-cursor="open">
-            {d.work.visit}
-          </a>
+          <div className={c.tail}>
+            <a className="btn btn--solid magnetic" href={project.url} target="_blank" rel="noreferrer" data-cursor="open">
+              {d.work.visit}
+            </a>
+          </div>
         )}
       </div>
     </main>

@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import s from "./sections.module.css";
+import w from "./Work.module.css";
 import { useReveal } from "@/lib/useReveal";
 import { PROJECTS } from "@/data/projects";
 import type { Locale } from "@/i18n/config";
@@ -23,17 +24,32 @@ export default function WorkTeaser({ locale, dict }: { locale: Locale; dict: Dic
           <h2 className={`display d-md reveal ${s.headText}`}>{dict.work.title}</h2>
         </div>
 
-        <Link href={`/${locale}/work/${project.slug}`} className={`${s.workRow} reveal`} data-cursor="view">
-          <div className={s.workShot}>
-            <img src={project.cover} alt="" loading="lazy" decoding="async" />
+        {/*
+          Percorso corto: il logo del cliente, due righe per capire di cosa si
+          tratta, e da qui si entra direttamente nel sito. La pagina del
+          progetto resta a disposizione di chi vuole sapere come è fatto.
+        */}
+        <article className={`${w.card} reveal`}>
+          <div className={w.plate} style={{ background: project.plate }}>
+            <img src={project.logo} alt={project.name} />
           </div>
-          <div>
-            <h3 className={s.workName}>{project.name}</h3>
-            <p className={s.workMeta}>{copy.sector} · {project.year}</p>
-            <p className={s.workTag}>{copy.tagline}</p>
-            <span className="btn btn--on-dark">{dict.work.all}</span>
+
+          <div className={w.body}>
+            <h3 className={w.name}>{project.name}</h3>
+            <p className={w.meta}>{copy.sector} · {project.year}</p>
+            <p className={w.short}>{copy.short}</p>
+            <div className={w.actions}>
+              {project.url && (
+                <a className="btn btn--solid magnetic" href={project.url} target="_blank" rel="noreferrer" data-cursor="open">
+                  {dict.work.visit}
+                </a>
+              )}
+              <Link className="btn btn--on-dark" href={`/${locale}/work/${project.slug}`} data-cursor="view">
+                {dict.work.detail}
+              </Link>
+            </div>
           </div>
-        </Link>
+        </article>
       </div>
     </section>
   );

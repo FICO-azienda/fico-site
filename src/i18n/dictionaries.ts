@@ -12,7 +12,7 @@ export interface Dict {
   film: { chapters: string[][] };
   services: { eyebrow: string; title: string; intro: string; items: { n: string; name: string; text: string; who: string }[] };
   sectors: { eyebrow: string; title: string; note: string; items: string[] };
-  work: { eyebrow: string; title: string; intro: string; all: string; visit: string; challenge: string; idea: string; design: string; build: string; scope: string; sector: string; year: string };
+  work: { eyebrow: string; title: string; intro: string; all: string; visit: string; open: string; detail: string; challenge: string; idea: string; design: string; build: string; scope: string; sector: string; year: string };
   process: { eyebrow: string; title: string; phrase1: string; phrase2: string; steps: { n: string; name: string; text: string }[] };
   pricing: { eyebrow: string; title: string; text: string; includedLabel: string; included: string[]; extraLabel: string; extra: string; afterLabel: string; after: string; cta: string };
   studio: { eyebrow: string; title: string; text: string; people: { name: string; line: string; focus: string }[] };
@@ -84,7 +84,9 @@ const it: Dict = {
     title: "Un progetto alla volta, fatto bene.",
     intro: "",
     all: "Tutti i lavori",
-    visit: "Visita il sito",
+    visit: "Entra nel sito",
+    open: "Apri il progetto",
+    detail: "Come l'abbiamo fatto",
     challenge: "La sfida",
     idea: "L'idea",
     design: "Design",
@@ -219,7 +221,9 @@ const en: Dict = {
     title: "One project at a time, done properly.",
     intro: "",
     all: "All work",
-    visit: "Visit the site",
+    visit: "Enter the site",
+    open: "Open the project",
+    detail: "How we built it",
     challenge: "The challenge",
     idea: "The idea",
     design: "Design",

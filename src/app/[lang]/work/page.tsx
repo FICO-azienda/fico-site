@@ -5,7 +5,7 @@ import { LOCALES, isLocale } from "@/i18n/config";
 import { getDict } from "@/i18n/dictionaries";
 import { PROJECTS } from "@/data/projects";
 import p from "@/components/PageHead.module.css";
-import s from "@/components/sections.module.css";
+import w from "@/components/Work.module.css";
 
 export function generateStaticParams() {
   return LOCALES.map((lang) => ({ lang }));
@@ -33,24 +33,26 @@ export default async function WorkIndex({ params }: { params: Promise<{ lang: st
         {PROJECTS.map((project) => {
           const copy = project.copy[lang];
           return (
-            <Link
-              key={project.slug}
-              href={`/${lang}/work/${project.slug}`}
-              className={s.workRow}
-              data-cursor="view"
-              style={{ paddingTop: "2rem", borderTop: "1px solid rgba(22,54,40,.16)" }}
-            >
-              <div className={s.workShot}>
-                <img src={project.cover} alt="" loading="lazy" decoding="async" />
+            <article key={project.slug} className={`${w.card} ${w.onLight}`}>
+              <div className={w.plate} style={{ background: project.plate }}>
+                <img src={project.logo} alt={project.name} />
               </div>
               <div>
-                <h2 className={s.workName} style={{ color: "var(--on-light)" }}>{project.name}</h2>
-                <p className={s.workMeta} style={{ color: "var(--on-light-faint)" }}>
-                  {copy.sector} · {project.year}
-                </p>
-                <p className={s.workTag} style={{ color: "var(--on-light-dim)" }}>{copy.tagline}</p>
+                <h2 className={w.name}>{project.name}</h2>
+                <p className={w.meta}>{copy.sector} · {project.year}</p>
+                <p className={w.short}>{copy.short}</p>
+                <div className={w.actions}>
+                  {project.url && (
+                    <a className="btn btn--solid magnetic" href={project.url} target="_blank" rel="noreferrer" data-cursor="open">
+                      {d.work.visit}
+                    </a>
+                  )}
+                  <Link className="btn" href={`/${lang}/work/${project.slug}`} data-cursor="view">
+                    {d.work.detail}
+                  </Link>
+                </div>
               </div>
-            </Link>
+            </article>
           );
         })}
       </div>
