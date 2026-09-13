@@ -4,6 +4,7 @@ import { getDict } from "@/i18n/dictionaries";
 import Loader from "@/components/Loader";
 import FilmExperience from "@/components/FilmExperience";
 import Services from "@/components/Services";
+import Styles from "@/components/Styles";
 import Worlds from "@/components/Worlds";
 import WorkGallery from "@/components/WorkGallery";
 import Approach from "@/components/Approach";
@@ -24,6 +25,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
       <h1 className="sr-only">{dict.hero.title}</h1>
       <FilmExperience dict={dict} />
       <Services dict={dict} />
+      <Styles locale={lang} dict={dict} />
       <Worlds dict={dict} />
       <WorkGallery locale={lang} dict={dict} />
       <Approach dict={dict} />

@@ -11,6 +11,7 @@ export interface Dict {
   hero: { eyebrow: string; title: string; sub: string; ctaPrimary: string; ctaSecondary: string; scroll: string; skip: string };
   film: { chapters: string[][] };
   services: { eyebrow: string; title: string; intro: string; items: { n: string; name: string; text: string; who: string }[] };
+  styles: { eyebrow: string; title: string; intro: string; fitLabel: string; cta: string };
   sectors: { eyebrow: string; title: string; note: string; items: string[] };
   work: { eyebrow: string; title: string; intro: string; all: string; visit: string; open: string; detail: string; challenge: string; idea: string; design: string; build: string; scope: string; sector: string; year: string };
   process: { eyebrow: string; title: string; phrase1: string; phrase2: string; steps: { n: string; name: string; text: string }[] };
@@ -72,6 +73,13 @@ const it: Dict = {
         who: "Chi vende prodotti o servizi anche fuori dal negozio.",
       },
     ],
+  },
+  styles: {
+    eyebrow: "Stili",
+    title: "Scegli il tuo stile.",
+    intro: "Undici direzioni visive, una per ogni tipo di attività. Non sono modelli da riempire: sono punti di partenza da cui costruiamo il tuo.",
+    fitLabel: "Adatto a",
+    cta: "Ne voglio uno così",
   },
   sectors: {
     eyebrow: "Per chi",
@@ -209,6 +217,13 @@ const en: Dict = {
         who: "Anyone selling products or services beyond the shop floor.",
       },
     ],
+  },
+  styles: {
+    eyebrow: "Styles",
+    title: "Choose your look.",
+    intro: "Eleven visual directions, one for each kind of business. They aren't templates to fill in — they're the starting points we build yours from.",
+    fitLabel: "Suits",
+    cta: "I want one like this",
   },
   sectors: {
     eyebrow: "Who we build for",

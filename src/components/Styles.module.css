@@ -1,0 +1,164 @@
+/* "Scegli il tuo stile": sei direzioni che scorrono di lato mentre si scende.
+   Fondo verde quasi nero — diverso dal nero della vetrina lavori — perché le
+   sei schermate sono quasi tutte chiare e calde e vanno staccate dal fondo. */
+
+.styles { position: relative; background: var(--green-abyss); color: var(--on-dark); }
+
+.pin {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(2rem, 5vh, 3.4rem);
+  padding: clamp(5rem, 10vh, 7rem) 0;
+  overflow: hidden;
+}
+
+.head {
+  padding: 0 var(--pad);
+  display: grid;
+  grid-template-columns: minmax(0, 7rem) 1fr;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.head > p:first-child { color: var(--on-dark-faint); padding-top: 0.9rem; }
+
+.intro {
+  margin: 1.2rem 0 0;
+  max-width: 52ch;
+  color: var(--on-dark-dim);
+  font-size: clamp(0.95rem, 1.2vw, 1.06rem);
+  line-height: 1.62;
+}
+
+.track {
+  display: flex;
+  gap: clamp(1.2rem, 2.4vw, 2.2rem);
+  padding: 0 var(--pad);
+  width: max-content;
+  will-change: transform;
+}
+
+.card {
+  flex: none;
+  width: clamp(18rem, 32vw, 30rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid rgba(236, 231, 219, 0.14);
+  transition: border-color 0.5s var(--ease);
+}
+
+.card:hover .frame { border-color: rgba(236, 231, 219, 0.3); }
+
+.frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.6s var(--ease);
+}
+
+.card:hover .frame img { transform: scale(1.025); }
+
+.num {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0.6rem 0.9rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  color: var(--on-dark);
+  background: rgba(7, 16, 11, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.body { padding-top: 1.4rem; }
+
+.name {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 300;
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0 0 0.7rem;
+}
+
+.mood {
+  margin: 0 0 1.1rem;
+  color: var(--on-dark-dim);
+  font-size: clamp(0.9rem, 1.05vw, 1rem);
+  line-height: 1.6;
+  max-width: 44ch;
+}
+
+.fit {
+  margin: 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(236, 231, 219, 0.14);
+  font-size: 0.82rem;
+  color: var(--on-dark-faint);
+  line-height: 1.5;
+}
+
+.fitLabel {
+  display: block;
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+/* ultima scheda: l'invito, così lo scorrimento finisce su un'azione */
+.last {
+  justify-content: center;
+  width: clamp(15rem, 22vw, 20rem);
+}
+
+.lastInner {
+  border: 1px solid rgba(236, 231, 219, 0.18);
+  padding: clamp(2rem, 4vw, 3rem);
+  aspect-ratio: 16 / 9;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.4rem;
+}
+
+.lastText {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 300;
+  font-size: clamp(1.2rem, 2vw, 1.7rem);
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------- telefono */
+
+@media (max-width: 900px) {
+  .pin { min-height: 0; padding: clamp(4rem, 9vh, 6rem) 0; }
+  .head { grid-template-columns: 1fr; gap: 1rem; }
+  .head > p:first-child { padding-top: 0; }
+  .track {
+    width: auto;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: var(--pad);
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 1rem;
+  }
+  .track::-webkit-scrollbar { height: 2px; }
+  .track::-webkit-scrollbar-thumb { background: rgba(236, 231, 219, 0.24); }
+  .card { width: min(80vw, 26rem); scroll-snap-align: start; }
+  .last { width: min(70vw, 20rem); }
+}

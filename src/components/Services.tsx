@@ -8,7 +8,7 @@ import { useReveal } from "@/lib/useReveal";
 import type { Dict } from "@/i18n/dictionaries";
 
 const SHOTS = [
-  "/img/worlds/hospitality@portrait.webp",
+  "/img/services/terrazza@portrait.webp",
   "/img/worlds/services@portrait.webp",
   "/img/worlds/retail@portrait.webp",
 ];
