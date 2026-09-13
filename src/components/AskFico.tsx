@@ -33,6 +33,33 @@ interface Contact {
 
 const EMPTY: Contact = { name: "", company: "", email: "", phone: "", link: "", note: "" };
 
+/*
+  Le risposte restano nella sessione del browser. Chi chiude per sbaglio, o
+  ricarica, non ricomincia da capo: quattro domande buttate sono una richiesta
+  persa. Si svuota appena la richiesta parte davvero.
+*/
+const SAVE_KEY = "fico.ask.v1";
+
+interface Saved {
+  current: string;
+  history: string[];
+  answers: Answers;
+  phase: Phase;
+  contact: Contact;
+}
+
+function load(): Saved | null {
+  try {
+    const raw = sessionStorage.getItem(SAVE_KEY);
+    if (!raw) return null;
+    const v = JSON.parse(raw) as Saved;
+    // "done" non si ripristina: la richiesta di prima e' gia' partita
+    return v.phase === "done" ? null : v;
+  } catch {
+    return null;
+  }
+}
+
 export default function AskFico({ locale }: { locale: Locale }) {
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState<string>(FIRST_QUESTION);
@@ -41,28 +68,61 @@ export default function AskFico({ locale }: { locale: Locale }) {
   const [phase, setPhase] = useState<Phase>("questions");
   const [contact, setContact] = useState<Contact>(EMPTY);
   const [consent, setConsent] = useState(false);
+  /* campo invisibile: le persone non lo vedono, i robot lo riempiono */
+  const [trapField, setTrapField] = useState("");
   const [busy, setBusy] = useState(false);
+  const [restored, setRestored] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fallback, setFallback] = useState<string | null>(null);
   const panel = useRef<HTMLDivElement>(null);
+  const overlay = useRef<HTMLDivElement>(null);
+  const opener = useRef<HTMLElement | null>(null);
 
   const T = (v: { it: string; en: string }) => v[locale];
 
   /* ------------------------------------------------------------- apertura */
-  const openAsk = useCallback(() => setOpen(true), []);
-  const closeAsk = useCallback(() => setOpen(false), []);
+  const openAsk = useCallback((e: Event) => {
+    /*
+      Il pulsante arriva insieme all'evento invece di essere dedotto da
+      document.activeElement: Safari non dà il focus ai pulsanti quando li si
+      clicca col mouse, quindi altrimenti alla chiusura il focus non avrebbe
+      dove tornare.
+    */
+    const from = (e as CustomEvent<{ trigger?: HTMLElement }>).detail?.trigger;
+    opener.current = from ?? (document.activeElement as HTMLElement | null);
+    setOpen(true);
+  }, []);
+  const closeAsk = useCallback(() => {
+    setOpen(false);
+    // il focus torna dove stava, ma dopo che la sovrapposizione si è ritirata:
+    // affidarlo alla pulizia dell'effetto lo faceva scattare troppo presto
+    const back = opener.current;
+    window.setTimeout(() => back?.focus?.({ preventScroll: true }), 60);
+  }, []);
 
   useEffect(() => {
     window.addEventListener("fico:ask-open", openAsk);
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeAsk();
+    };
     window.addEventListener("keydown", onKey);
+    const saved = load();
+    if (saved) {
+      setCurrent(saved.current);
+      setHistory(saved.history);
+      setAnswers(saved.answers);
+      setPhase(saved.phase);
+      setContact(saved.contact);
+    }
+    setRestored(true);
+
     // link diretto per le campagne: /?preventivo
     if (new URLSearchParams(window.location.search).has("preventivo")) setOpen(true);
     return () => {
       window.removeEventListener("fico:ask-open", openAsk);
       window.removeEventListener("keydown", onKey);
     };
-  }, [openAsk]);
+  }, [openAsk, closeAsk]);
 
   useEffect(() => {
     const lenis = getLenis();
@@ -70,6 +130,74 @@ export default function AskFico({ locale }: { locale: Locale }) {
     if (open) lenis?.stop();
     else lenis?.start();
   }, [open]);
+
+  /*
+    Trappola per il focus. Senza, con la sovrapposizione aperta il tasto Tab
+    porta dietro la pagina — su elementi che non si vedono — e chi naviga da
+    tastiera si perde. Alla chiusura il focus torna al pulsante di partenza.
+  */
+  useEffect(() => {
+    const root = overlay.current;
+    if (!open || !root) return;
+
+    const focusable = () =>
+      Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled])',
+        ),
+      ).filter((el) => el.offsetParent !== null);
+
+    // un fotogramma di attesa: all'istante dell'apertura la sovrapposizione è
+    // ancora nascosta, e focus() su un elemento invisibile non ha alcun effetto
+    const enter = requestAnimationFrame(() => {
+      const first = focusable()[0];
+      (first ?? root).focus({ preventScroll: true });
+    });
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const list = focusable();
+      if (!list.length) return;
+      const head = list[0];
+      const tail = list[list.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (!active || !root.contains(active)) {
+        e.preventDefault();
+        head.focus();
+      } else if (e.shiftKey && active === head) {
+        e.preventDefault();
+        tail.focus();
+      } else if (!e.shiftKey && active === tail) {
+        e.preventDefault();
+        head.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKey);
+    return () => {
+      cancelAnimationFrame(enter);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  /* a ogni passaggio il focus torna in cima alla domanda nuova */
+  useEffect(() => {
+    if (!open) return;
+    const id = requestAnimationFrame(() => {
+      panel.current?.querySelector<HTMLElement>("h2")?.focus?.({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [current, phase, open]);
+
+  useEffect(() => {
+    if (!restored) return;
+    try {
+      if (phase === "done") sessionStorage.removeItem(SAVE_KEY);
+      else sessionStorage.setItem(SAVE_KEY, JSON.stringify({ current, history, answers, phase, contact }));
+    } catch {
+      // navigazione privata o spazio esaurito: si prosegue senza salvare
+    }
+  }, [restored, current, history, answers, phase, contact]);
 
   /* ------------------------------------------------------- avanzamento */
   const path = useMemo(() => pathFor(answers), [answers]);
@@ -200,7 +328,7 @@ export default function AskFico({ locale }: { locale: Locale }) {
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ locale, brief: answers, summary: sentence, contact }),
+        body: JSON.stringify({ locale, brief: answers, summary: sentence, contact, website: trapField }),
       });
       if (res.ok) setPhase("done");
       else setFallback(T(ASK_UI.errorFallback));
@@ -215,7 +343,15 @@ export default function AskFico({ locale }: { locale: Locale }) {
   const showStep = phase === "questions" && q;
 
   return (
-    <div className={styles.overlay} data-open={open} role="dialog" aria-modal="true" aria-label="Ask FICO">
+    <div
+      ref={overlay}
+      className={styles.overlay}
+      data-open={open}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Ask FICO"
+      tabIndex={-1}
+    >
       <div className={styles.bar}>
         <span className={styles.eyebrow}>{T(ASK_UI.eyebrow)}</span>
         {(history.length > 0 || phase !== "questions") && phase !== "done" && (
@@ -241,7 +377,7 @@ export default function AskFico({ locale }: { locale: Locale }) {
           {showStep && (
             <div className={styles.fade} key={current}>
               {q.lead && <p className={styles.lead}>{T(q.lead)}</p>}
-              <h2 className={styles.question}>{T(q.title)}</h2>
+              <h2 className={styles.question} tabIndex={-1}>{T(q.title)}</h2>
               {q.hint && <p className={styles.hint}>{T(q.hint)}</p>}
 
               {q.kind === "single" && (
@@ -345,7 +481,7 @@ export default function AskFico({ locale }: { locale: Locale }) {
           {/* ---------------------------------------------------- riepilogo */}
           {phase === "summary" && (
             <div className={styles.fade}>
-              <h2 className={styles.question}>{T(ASK_UI.summaryTitle)}</h2>
+              <h2 className={styles.question} tabIndex={-1}>{T(ASK_UI.summaryTitle)}</h2>
               <p className={styles.sentence}>{sentence}</p>
               <div className={styles.recap}>
                 {recap.map((r) => (
@@ -365,7 +501,7 @@ export default function AskFico({ locale }: { locale: Locale }) {
           {/* ------------------------------------------------------ contatti */}
           {phase === "contact" && (
             <form className={styles.fade} onSubmit={submit}>
-              <h2 className={styles.question}>{T(ASK_UI.contactTitle)}</h2>
+              <h2 className={styles.question} tabIndex={-1}>{T(ASK_UI.contactTitle)}</h2>
               {error && <p className={styles.error}>{error}</p>}
               {fallback && (
                 <p className={styles.error}>
@@ -373,6 +509,20 @@ export default function AskFico({ locale }: { locale: Locale }) {
                   <a href={mailtoHref()}>{T(ASK_UI.openMail)}</a>
                 </p>
               )}
+
+              {/* trappola per i robot: fuori dal flusso e invisibile a chi legge */}
+              <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
+                <label htmlFor="fico-website">Website</label>
+                <input
+                  id="fico-website"
+                  name="website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={trapField}
+                  onChange={(e) => setTrapField(e.target.value)}
+                />
+              </div>
 
               <div className={styles.grid2}>
                 <div className={styles.field}>
@@ -421,7 +571,7 @@ export default function AskFico({ locale }: { locale: Locale }) {
           {/* --------------------------------------------------------- fatto */}
           {phase === "done" && (
             <div className={`${styles.fade} ${styles.done}`}>
-              <h2 className={styles.question}>{T(ASK_UI.doneTitle)}</h2>
+              <h2 className={styles.question} tabIndex={-1}>{T(ASK_UI.doneTitle)}</h2>
               <p className={styles.sentence}>{T(ASK_UI.doneText)}</p>
               <button className="btn" style={{ marginTop: "2rem" }} onClick={closeAsk}>
                 {T(ASK_UI.close)}
@@ -434,4 +584,5 @@ export default function AskFico({ locale }: { locale: Locale }) {
   );
 }
 
-export const openAskFico = () => window.dispatchEvent(new Event("fico:ask-open"));
+export const openAskFico = (trigger?: HTMLElement) =>
+  window.dispatchEvent(new CustomEvent("fico:ask-open", { detail: { trigger } }));

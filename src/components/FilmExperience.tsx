@@ -232,7 +232,7 @@ export default function FilmExperience({ dict }: { dict: Dict }) {
           <h1 className={`display d-lg ${styles.heroTitle}`}>{dict.hero.title}</h1>
           <p className={styles.heroSub}>{dict.hero.sub}</p>
           <div className={styles.heroActions}>
-            <button className="btn btn--solid magnetic" onClick={openAskFico} data-cursor="open">
+            <button className="btn btn--solid magnetic" onClick={(e) => openAskFico(e.currentTarget)} data-cursor="open">
               {dict.hero.ctaPrimary}
             </button>
             <a className="btn btn--on-dark magnetic" href="#work" data-cursor="explore">

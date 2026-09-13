@@ -69,7 +69,7 @@ export default function ClosingCta({ dict }: { dict: Dict }) {
         </h2>
         <p className={`body-lg ${styles.line} reveal`}>{dict.contact.sub}</p>
         <div className={`${styles.actions} reveal`}>
-          <button className="btn btn--solid magnetic" onClick={openAskFico} data-cursor="open">
+          <button className="btn btn--solid magnetic" onClick={(e) => openAskFico(e.currentTarget)} data-cursor="open">
             {dict.contact.cta}
           </button>
         </div>

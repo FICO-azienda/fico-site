@@ -14,8 +14,39 @@ const TO = process.env.CONTACT_TO ?? "ficolc78@gmail.com";
 const FROM = process.env.CONTACT_FROM; // es. "FICO <ciao@vostrodominio.it>"
 const KEY = process.env.RESEND_API_KEY;
 
+/*
+  Difese minime ma necessarie: senza, appena il sito e' indicizzato arrivano i
+  robot. E ogni invio falso fa partire anche l'email di conferma verso indirizzi
+  inesistenti, che e' il modo piu' rapido per rovinare la reputazione del
+  dominio presso i provider di posta.
+
+  Il conteggio vive in memoria: su Vercel ogni istanza ha la sua, quindi ferma
+  le raffiche ma non un attacco distribuito. Per quello servirebbe un archivio
+  condiviso, che oggi sarebbe sproporzionato.
+*/
+const WINDOW_MS = 10 * 60 * 1000;
+const MAX_PER_WINDOW = 3;
+const hits = new Map<string, number[]>();
+
+function tooMany(ip: string): boolean {
+  const now = Date.now();
+  const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
+  recent.push(now);
+  hits.set(ip, recent);
+  if (hits.size > 500) {
+    // la mappa non deve crescere all'infinito
+    for (const [key, times] of hits) if (!times.some((t) => now - t < WINDOW_MS)) hits.delete(key);
+  }
+  return recent.length > MAX_PER_WINDOW;
+}
+
+const MAX_FIELD = 2000;
+const clip = (v: unknown) => String(v ?? "").slice(0, MAX_FIELD);
+
 interface Payload {
   locale?: "it" | "en";
+  /** campo trappola: se e' pieno, chi ha inviato non e' una persona */
+  website?: string;
   brief?: Record<string, string | string[]>;
   summary?: string;
   contact?: {
@@ -66,6 +97,24 @@ export async function POST(request: Request) {
 
   const { contact = {}, brief = {}, summary = "", locale = "it" } = payload;
 
+  // Al robot si risponde che e' andato tutto bene: se gli dicessimo che e'
+  // stato scoperto, chi lo governa cambierebbe tattica.
+  if (payload.website) return NextResponse.json({ ok: true });
+
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    "sconosciuto";
+  if (tooMany(ip)) {
+    return NextResponse.json({ ok: false, error: "too-many" }, { status: 429 });
+  }
+
+  for (const value of Object.values(contact)) {
+    if (typeof value === "string" && value.length > MAX_FIELD) {
+      return NextResponse.json({ ok: false, error: "too-long" }, { status: 413 });
+    }
+  }
+
   if (!contact.email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(contact.email)) {
     return NextResponse.json({ ok: false, error: "invalid-email" }, { status: 422 });
   }
@@ -77,7 +126,7 @@ export async function POST(request: Request) {
   }
 
   const resend = new Resend(KEY);
-  const who = contact.name?.trim() || contact.email;
+  const who = clip(contact.name).trim() || contact.email;
 
   const studio = shell(
     `Nuova richiesta da ${esc(who)}`,

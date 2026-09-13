@@ -20,7 +20,7 @@ export default function Pricing({ dict }: { dict: Dict }) {
             <div>
               <h2 className={`${s.priceBig} reveal`}>{d.title}</h2>
               <p className={`${s.priceText} reveal`}>{d.text}</p>
-              <button className="btn btn--solid magnetic reveal" onClick={openAskFico} data-cursor="open">
+              <button className="btn btn--solid magnetic reveal" onClick={(e) => openAskFico(e.currentTarget)} data-cursor="open">
                 {d.cta}
               </button>
             </div>

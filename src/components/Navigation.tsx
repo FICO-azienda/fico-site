@@ -101,9 +101,10 @@ export default function Navigation({ locale, dict }: { locale: Locale; dict: Dic
     return `/${to}${rest}`;
   };
 
-  const quote = () => {
+  const quote = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const btn = e.currentTarget;
     setOpen(false);
-    window.setTimeout(openAskFico, open ? 400 : 0);
+    window.setTimeout(() => openAskFico(btn), open ? 400 : 0);
   };
 
   return (

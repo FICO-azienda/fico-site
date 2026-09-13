@@ -5,7 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import s from "./Styles.module.css";
 import { STYLES } from "@/data/styles";
-import { isLightDevice, prefersReducedMotion } from "@/animations/scroll";
+import { canPinHorizontal, prefersReducedMotion } from "@/animations/scroll";
 import { useReveal } from "@/lib/useReveal";
 import { openAskFico } from "./AskFico";
 import type { Locale } from "@/i18n/config";
@@ -27,7 +27,7 @@ export default function Styles({ locale, dict }: { locale: Locale; dict: Dict })
     const el = root.current;
     const strip = track.current;
     if (!el || !strip) return;
-    if (prefersReducedMotion() || isLightDevice()) return;
+    if (prefersReducedMotion() || !canPinHorizontal()) return;
 
     gsap.registerPlugin(ScrollTrigger);
     let tween: gsap.core.Tween | null = null;
@@ -112,7 +112,7 @@ export default function Styles({ locale, dict }: { locale: Locale; dict: Dict })
           <article className={`${s.card} ${s.last}`}>
             <div className={s.lastInner}>
               <p className={s.lastText}>{dict.styles.title}</p>
-              <button className="btn btn--on-dark magnetic" onClick={openAskFico} data-cursor="open">
+              <button className="btn btn--on-dark magnetic" onClick={(e) => openAskFico(e.currentTarget)} data-cursor="open">
                 {dict.styles.cta}
               </button>
             </div>

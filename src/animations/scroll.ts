@@ -17,6 +17,15 @@ export const isLightDevice = () =>
   typeof window !== "undefined" &&
   (window.innerWidth < 900 || isCoarsePointer() || navigator.hardwareConcurrency <= 4);
 
+/**
+ * Se ha senso bloccare la pagina per far scorrere qualcosa di lato.
+ * Qui contano solo larghezza e tipo di puntatore: legare la scelta al numero
+ * di core, come per il video, faceva ricadere sull'impaginato da telefono
+ * anche portatili perfettamente capaci.
+ */
+export const canPinHorizontal = () =>
+  typeof window !== "undefined" && window.innerWidth >= 1000 && !isCoarsePointer();
+
 export function initScroll() {
   if (typeof window === "undefined") return null;
   if (!registered) {
