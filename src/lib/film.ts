@@ -18,8 +18,11 @@ export const SEAM_START = 38.9;
 export const SEAM_LOGO = {
   frameW: 1280,
   frameH: 720,
-  centerX: 0.49659,
-  centerY: 0.50069,
+  // corretti misurando i pixel del fotogramma finale contro il logo del sito:
+  // nel logo di Runway marchio e parola sono appena più vicini che nel file
+  // originale, quindi il centro sta a metà fra i due scarti (max ~4px a 1440)
+  centerX: 0.49768,
+  centerY: 0.4918,
   width: 0.20742,
   /** proporzioni del file del logo, non del ritaglio sfocato del video */
   aspect: 1.18,

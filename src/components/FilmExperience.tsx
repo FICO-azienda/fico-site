@@ -12,8 +12,8 @@ import {
   chapterWeight,
   type Chapter,
 } from "@/lib/film";
-import { createVideoScrub, type ScrubHandle } from "@/animations/videoScrub";
-import { isLightDevice, prefersReducedMotion } from "@/animations/scroll";
+import { createFrameScrub, type FrameScrub } from "@/animations/frameScrub";
+import { isCoarsePointer, prefersReducedMotion } from "@/animations/scroll";
 import { openAskFico } from "./AskFico";
 import type { Dict } from "@/i18n/dictionaries";
 
@@ -35,7 +35,7 @@ const SCROLL_SCREENS_LIGHT = 4.5;
 export default function FilmExperience({ dict }: { dict: Dict }) {
   const root = useRef<HTMLDivElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const posterRef = useRef<HTMLImageElement>(null);
   const seamRef = useRef<HTMLDivElement>(null);
   const seamLogoRef = useRef<HTMLDivElement>(null);
@@ -45,17 +45,13 @@ export default function FilmExperience({ dict }: { dict: Dict }) {
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const video = videoRef.current;
+    const canvas = canvasRef.current;
     const el = root.current;
-    if (!video || !el) return;
+    const vp = viewport.current;
+    if (!canvas || !el || !vp) return;
 
     const reduced = prefersReducedMotion();
-    const light = isLightDevice();
-
-    // Sorgente scelta a runtime: su mobile il file leggero, che non verra'
-    // comunque scrubbato ma riprodotto normalmente.
-    video.src = light ? "/video/fico-film-mobile.mp4" : "/video/fico-film.mp4";
-    video.load();
+    const compact = window.innerWidth < 900 || isCoarsePointer();
 
     let announced = false;
     const announce = () => {
@@ -64,51 +60,23 @@ export default function FilmExperience({ dict }: { dict: Dict }) {
       window.dispatchEvent(new CustomEvent("fico:film-ready"));
       gsap.to(posterRef.current, { opacity: 0, duration: 1.1, ease: "power2.out" });
     };
-    // basta poter iniziare: non si aspetta l'intero film per far entrare l'utente
-    video.addEventListener("loadeddata", announce);
-    video.addEventListener("canplay", announce);
+    // rete di sicurezza: se la rete è lentissima si entra comunque, sul poster
     const safety = window.setTimeout(announce, 6000);
 
     if (reduced) {
       // niente pin, niente scrub: il film resta un'immagine e i testi si leggono
       el.dataset.static = "true";
       gsap.set(chapterRefs.current.filter(Boolean), { opacity: 1, visibility: "visible" });
-      return () => {
-        window.clearTimeout(safety);
-        video.removeEventListener("loadeddata", announce);
-        video.removeEventListener("canplay", announce);
-      };
+      announce();
+      return () => window.clearTimeout(safety);
     }
 
     gsap.registerPlugin(ScrollTrigger);
-
-    let scrub: ScrubHandle | null = null;
     const lastWeight = new Map<number, number>();
 
-    /**
-     * Dimensioni del fotogramma cosi' come lo vede l'utente: il video e'
-     * in object-fit cover, quindi va ricalcolato a ogni resize per poter
-     * posare il logo del sito esattamente sopra quello del film.
-     */
-    const placeSeamLogo = () => {
-      const logo = seamLogoRef.current;
-      const vp = viewport.current;
-      if (!logo || !vp) return;
-      const vw = vp.clientWidth;
-      const vh = vp.clientHeight;
-      const scale = Math.max(vw / SEAM_LOGO.frameW, vh / SEAM_LOGO.frameH);
-      const w = SEAM_LOGO.frameW * SEAM_LOGO.width * scale;
-      const cx = vw / 2 + (SEAM_LOGO.centerX - 0.5) * SEAM_LOGO.frameW * scale;
-      const cy = vh / 2 + (SEAM_LOGO.centerY - 0.5) * SEAM_LOGO.frameH * scale;
-      logo.style.width = `${w}px`;
-      logo.style.left = `${cx - w / 2}px`;
-      logo.style.top = `${cy - w / SEAM_LOGO.aspect / 2}px`;
-    };
-    placeSeamLogo();
-
     /*
-      Quando la giuntura copre lo schermo il film e' di fatto una superficie
-      chiara: lo dichiara, cosi' la navigazione passa al verde scuro e non
+      Quando la giuntura copre lo schermo il film è di fatto una superficie
+      chiara: lo dichiara, così la navigazione passa al verde scuro e non
       resta bianca sull'avorio.
     */
     const applySeam = (v: number) => {
@@ -141,35 +109,49 @@ export default function FilmExperience({ dict }: { dict: Dict }) {
       });
     };
 
-    const ctx = gsap.context(() => {
-      const screens = light ? SCROLL_SCREENS_LIGHT : SCROLL_SCREENS_DESKTOP;
+    const scrub: FrameScrub = createFrameScrub(canvas, {
+      // Lenis ammorbidisce già lo scorrimento: uno smorzamento forte anche qui
+      // sommava due inerzie e il film sembrava inseguire la rotella
+      damping: compact ? 0.28 : 0.2,
+      onReady: announce,
+      onFrame: (t) => {
+        setChapters(t);
+        applySeam(gsap.utils.clamp(0, 1, (t - SEAM_START) / (FILM_DURATION - SEAM_START - 0.35)));
+      },
+    });
 
-      /*
-        Il film segue lo scroll su tutti i dispositivi, altrimenti su telefono
-        la riproduzione libera finirebbe prima o dopo la sezione e la giuntura
-        finale non cadrebbe mai al punto giusto. Sui dispositivi leggeri pero'
-        si usa il file piccolo e si chiedono molti meno seek: il passo e' piu'
-        grosso, ma non c'e' ingolfamento del decoder.
-      */
-      scrub = createVideoScrub(
-        video,
-        (t) => {
-          setChapters(t);
-          const seam = gsap.utils.clamp(
-            0,
-            1,
-            (t - SEAM_START) / (FILM_DURATION - SEAM_START - 0.35),
-          );
-          applySeam(seam);
-        },
-        light ? { damping: 0.2, threshold: 0.22 } : { damping: 0.14, threshold: 0.02 },
-      );
+    /*
+      Il logo della giuntura si posiziona con la stessa proiezione usata per
+      disegnare i fotogrammi, e si ricalcola a ogni cambio di misura del
+      riquadro — non solo al resize della finestra. Prima la posizione veniva
+      presa una volta sola e restava vecchia: da lì il logo fuori centro.
+    */
+    const placeSeamLogo = () => {
+      const logo = seamLogoRef.current;
+      if (!logo) return;
+      const fx = SEAM_LOGO.centerX * SEAM_LOGO.frameW;
+      const fy = SEAM_LOGO.centerY * SEAM_LOGO.frameH;
+      const { x, y, scale } = scrub.project(fx, fy);
+      const w = SEAM_LOGO.width * SEAM_LOGO.frameW * scale;
+      logo.style.width = `${w}px`;
+      logo.style.left = `${x - w / 2}px`;
+      logo.style.top = `${y - w / SEAM_LOGO.aspect / 2}px`;
+    };
+    placeSeamLogo();
+    if (process.env.NODE_ENV !== "production") {
+      (window as unknown as { ficoFilm?: FrameScrub }).ficoFilm = scrub;
+    }
+    const ro = new ResizeObserver(placeSeamLogo);
+    ro.observe(vp);
+
+    const ctx = gsap.context(() => {
+      const screens = compact ? SCROLL_SCREENS_LIGHT : SCROLL_SCREENS_DESKTOP;
 
       ScrollTrigger.create({
         trigger: el,
         start: "top top",
         end: () => `+=${window.innerHeight * screens}`,
-        pin: viewport.current,
+        pin: vp,
         pinSpacing: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
@@ -185,21 +167,15 @@ export default function FilmExperience({ dict }: { dict: Dict }) {
           }
           if (progressRef.current) progressRef.current.style.transform = `scaleX(${p})`;
           if (hintRef.current) hintRef.current.style.opacity = String(Math.max(0, 1 - p * 8));
-
-          scrub?.setTarget(p * FILM_DURATION);
+          scrub.setTarget(p * FILM_DURATION);
         },
       });
     }, el);
 
-    const onResize = () => placeSeamLogo();
-    window.addEventListener("resize", onResize);
-
     return () => {
       window.clearTimeout(safety);
-      window.removeEventListener("resize", onResize);
-      video.removeEventListener("loadeddata", announce);
-      video.removeEventListener("canplay", announce);
-      scrub?.destroy();
+      ro.disconnect();
+      scrub.destroy();
       ctx.revert();
     };
   }, []);
@@ -214,18 +190,8 @@ export default function FilmExperience({ dict }: { dict: Dict }) {
           alt=""
           aria-hidden="true"
         />
-        <video
-          ref={videoRef}
-          className={styles.video}
-          poster="/img/poster.webp"
-          muted
-          playsInline
-          preload="auto"
-          disablePictureInPicture
-          aria-label="Film di presentazione FICO"
-        />
+        <canvas ref={canvasRef} className={styles.video} role="img" aria-label="Film di presentazione FICO" />
         <div className={styles.veil} aria-hidden="true" />
-        <div className={styles.grain} aria-hidden="true" />
 
         <div ref={heroRef} className={styles.hero}>
           <p className={`eyebrow ${styles.heroEyebrow}`}>{dict.hero.eyebrow}</p>

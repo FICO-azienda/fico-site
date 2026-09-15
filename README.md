@@ -27,71 +27,34 @@ GitHub Pages) senza un server Node.
 
 ## Il film
 
-I due clip Runway sono stati uniti in un file solo, `public/video/fico-film.mp4`,
-40,13 secondi a 24 fps. La giunzione è invisibile perché il primo clip finisce
-sulla seta verde su cui il secondo comincia.
+Il film non è un `<video>`: è una **sequenza di 481 fotogrammi** (12 al secondo
+per 40 secondi) disegnata su canvas, in `public/film/`.
 
-**Perché sono stati riencodati.** I sorgenti avevano un keyframe ogni 58 e ogni
-128 fotogrammi. Lo scrub allo scroll chiede continuamente `currentTime`: ogni
-richiesta costringe il decoder a ripartire dal keyframe precedente, quindi con
-GOP così lunghi l'immagine si muove a scatti. I master hanno un keyframe ogni 6
-fotogrammi (un quarto di secondo).
+**Perché.** Lo scrub di un video chiede al browser di cercare un punto e
+decodificarlo a ogni scatto di rotella: il risultato va a strappi, e ricodificare
+il master per renderlo più scorrevole ne peggiorava la qualità. Con i fotogrammi
+non si decodifica nulla mentre si scorre — si sceglie quale disegnare — e fra un
+fotogramma e il successivo c'è una dissolvenza proporzionale alla posizione,
+così dodici al secondo danno un movimento continuo. Disegnare costa meno di 5 ms
+per fotogramma, contro i 16,7 del limite per i 60 fps.
 
-| file | uso | peso |
-|---|---|---|
-| `fico-film.mp4` | 1280×720, desktop | 12,6 MB |
-| `fico-film-mobile.mp4` | 854×480, dispositivi leggeri | 3,0 MB |
+| serie | misura | uso | peso |
+|---|---|---|---|
+| `d` | 1280×720 intero | schermi orizzontali | 16 MB |
+| `p` | 540×720 ritaglio centrale | telefoni in verticale | 7 MB |
 
-Per rigenerare tutto dai sorgenti:
+Il caricamento è a pettine: prima un fotogramma al secondo su tutto il film,
+poi due, quattro, dodici. Il film è scorribile quasi subito e si affina mentre
+arriva il resto.
 
-```bash
-node scripts/media.mjs     # monta, riencoda, poster, logo della giuntura, audio
-node scripts/stills.mjs    # fotogrammi per i settori, favicon, og
-node scripts/split-logo.mjs   # marchio, parola e lockup su fondo trasparente
-```
-
-## Catture dei siti dei clienti
-
-Le schermate in vetrina non sono mockup: sono catture del sito **dal vivo**,
-generate con un browser senza interfaccia.
+I fotogrammi vengono dai **clip originali**, con una leggera pulizia del rumore:
 
 ```bash
-node scripts/shots.mjs
+node scripts/frames.mjs
 ```
 
-Punta all'indirizzo pubblico del sito, scorre la pagina e torna in cima prima
-di scattare — altrimenti le animazioni legate allo scroll lasciano mezzo
-contenuto invisibile — e salva desktop (1600px) e telefono (600px) in
-`public/img/work/<cliente>/`. Per un nuovo cliente si cambiano `BASE` e l'elenco
-delle pagine in cima allo script.
-
-Il logo del cliente si prepara con `node scripts/client-logo.mjs`. Attenzione a
-un dettaglio che costa tempo: alcuni file **hanno già la trasparenza**, con il
-nero sotto i pixel invisibili. Scontornarli presumendo un fondo bianco rende
-opaco quel nero e il logo finisce dentro un riquadro scuro. Lo script controlla
-prima se l'alpha c'è e in quel caso non lo tocca.
-
-I percorsi dei sorgenti stanno in cima a `scripts/media.mjs`.
-
----
-
-## Come funziona lo scrub
-
-`src/animations/videoScrub.ts`. Tre accorgimenti fanno la differenza fra fluido
-e a scatti:
-
-1. **inerzia** — il tempo obiettivo viene inseguito con interpolazione smorzata,
-   così l'immagine non salta da un valore all'altro;
-2. **un seek alla volta** — finché il precedente non emette `seeked` non se ne
-   chiede un altro, altrimenti il browser accoda le richieste e l'immagine si
-   pianta;
-3. **mai oltre il buffer** — il tempo richiesto è limitato a quanto è già
-   scaricato, quindi non si finisce mai su un fotogramma inesistente.
-
-Su desktop la soglia di seek è mezzo fotogramma; sui dispositivi leggeri è
-0,22 s e si usa il file piccolo: passo più grosso, decoder non ingolfato.
-
----
+Il master mp4 resta in `media/` come sorgente di lavoro per gli altri script, ma
+il sito non lo scarica.
 
 ## La giuntura fra film e sito
 
@@ -103,9 +66,12 @@ Su desktop la soglia di seek è mezzo fotogramma; sui dispositivi leggeri è
 - il logo nel fotogramma sta al **49,88 % / 49,24 %** ed è largo il **20,78 %**
   della larghezza del fotogramma.
 
-`seam-logo.png` è ritagliato **dall'ultimo fotogramma del film**, non dal file
-del logo, così combacia pixel per pixel. A schermo viene posizionato ricalcolando
-il ritaglio `object-fit: cover` a ogni ridimensionamento (`placeSeamLogo`).
+Il logo del sito viene posizionato con **la stessa funzione che disegna i
+fotogrammi** (`project` in `src/animations/frameScrub.ts`), ricalcolata a ogni
+cambio di misura del riquadro. Le costanti di centro in `src/lib/film.ts` sono
+state corrette misurando i pixel del fotogramma finale contro il logo del sito:
+lo scarto residuo è di pochi pixel, dovuto al fatto che nel logo generato da
+Runway marchio e parola sono appena più vicini che nel file originale.
 
 Il risultato: negli ultimi 1,2 secondi lo strato avorio del DOM sale da 0 a 1
 sopra un video che mostra già esattamente quella stessa immagine. Non c'è nessun

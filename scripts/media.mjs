@@ -16,7 +16,8 @@ const CLIP_B = '/Users/cesarecicogna/Downloads/Agent Video - Image 1 depicts the
 const MUSIC  = '/Users/cesarecicogna/Documents/sito FICO/Agent Music - Moody_ minimal cinematic score for a premium luxury brand film_ Dark_ elegant and rest.mp3';
 const LOGO   = '/Users/cesarecicogna/Documents/sito FICO/video/1a8459c3-8056-4bc6-bc35-f7b28bfe1684.png';
 
-const OUT_V = 'public/video';
+// il master mp4 resta come sorgente di lavoro, fuori da public: il sito usa i fotogrammi
+const OUT_V = 'media';
 const OUT_I = 'public/img';
 const OUT_A = 'public/audio';
 [OUT_V, OUT_I, OUT_A, '.tmp'].forEach(d => mkdirSync(d, { recursive: true }));

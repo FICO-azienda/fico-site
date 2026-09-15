@@ -15,7 +15,8 @@ import sharp from 'sharp';
 
 mkdirSync('public/img/worlds', { recursive: true });
 mkdirSync('.tmp', { recursive: true });
-const FILM = 'public/video/fico-film.mp4';
+// master di lavoro: non è più servito dal sito, il film ora è una sequenza di fotogrammi
+const FILM = 'media/fico-film.mp4';
 const ff = (a) => execFileSync(ffmpegPath, ['-y', '-hide_banner', '-loglevel', 'error', ...a]);
 
 const WORLDS = [
