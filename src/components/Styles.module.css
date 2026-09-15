@@ -145,20 +145,53 @@
 
 /* --------------------------------------------------------------- telefono */
 
+/* ------------------------------------------------------------------ striscia */
+/*
+  La modalità la decide JavaScript e la scrive in data-mode: "pin" blocca la
+  sezione e fa scorrere le schede di lato, "swipe" le lascia trascinare.
+  Prima il blocco dipendeva da JS (sopra i 1000 px) e la striscia da una media
+  query (sotto i 900): fra 900 e 1000 px non valeva nessuna delle due e le
+  schede restavano ferme e tagliate.
+*/
+.styles[data-mode="swipe"] .pin { min-height: 0; padding: clamp(4rem, 9vh, 6rem) 0; }
+
+.styles[data-mode="swipe"] .track {
+  width: auto;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: var(--pad);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  padding-bottom: 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(236, 231, 219, 0.24) transparent;
+}
+
+.styles[data-mode="swipe"] .track::-webkit-scrollbar { height: 2px; }
+.styles[data-mode="swipe"] .track::-webkit-scrollbar-thumb { background: rgba(236, 231, 219, 0.24); }
+.styles[data-mode="swipe"] .card { scroll-snap-align: start; }
+
+/* frecce: solo in striscia e solo col mouse, dove trascinare non è naturale */
+.arrows { display: none; gap: 0.6rem; padding: 0 var(--pad); }
+.styles[data-mode="swipe"][data-pointer="fine"] .arrows { display: flex; }
+
+.arrow {
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(236, 231, 219, 0.24);
+  color: var(--on-dark);
+  cursor: pointer;
+  transition: background-color 0.35s var(--ease), border-color 0.35s var(--ease), opacity 0.35s;
+}
+
+.arrow:hover { background: rgba(236, 231, 219, 0.08); border-color: rgba(236, 231, 219, 0.5); }
+.arrow:disabled { opacity: 0.3; cursor: default; }
+
 @media (max-width: 900px) {
-  .pin { min-height: 0; padding: clamp(4rem, 9vh, 6rem) 0; }
   .head { grid-template-columns: 1fr; gap: 1rem; }
   .head > p:first-child { padding-top: 0; }
-  .track {
-    width: auto;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding-left: var(--pad);
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 1rem;
-  }
-  .track::-webkit-scrollbar { height: 2px; }
-  .track::-webkit-scrollbar-thumb { background: rgba(236, 231, 219, 0.24); }
-  .card { width: min(80vw, 26rem); scroll-snap-align: start; }
+  .card { width: min(80vw, 26rem); }
   .last { width: min(70vw, 20rem); }
 }

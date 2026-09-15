@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import styles from "./Worlds.module.css";
-import { isLightDevice } from "@/animations/scroll";
+import { isCoarsePointer } from "@/animations/scroll";
 import { useReveal } from "@/lib/useReveal";
 import type { Dict } from "@/i18n/dictionaries";
 
@@ -31,7 +31,9 @@ export default function Worlds({ dict }: { dict: Dict }) {
   const names = dict.sectors.items;
 
   useEffect(() => {
-    setTouch(isLightDevice());
+    // col dito non c'è hover: il settore attivo lo sceglie lo scorrimento.
+    // Il numero di core non dice nulla sulla presenza di un mouse.
+    setTouch(isCoarsePointer());
   }, []);
 
   /* senza puntatore il mondo attivo lo decide lo scorrimento */
