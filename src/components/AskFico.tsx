@@ -346,6 +346,7 @@ export default function AskFico({ locale }: { locale: Locale }) {
     <div
       ref={overlay}
       className={styles.overlay}
+      data-lenis-prevent
       data-open={open}
       role="dialog"
       aria-modal="true"
