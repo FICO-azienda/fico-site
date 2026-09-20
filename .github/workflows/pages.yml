@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Rimuovi parti server (non supportate da Pages)
+        run: rm -rf src/app/api src/app/sitemap.ts src/app/robots.ts
+      - run: npx next build
+        env:
+          GITHUB_PAGES: "1"
+      - name: Prefissa i percorsi degli asset con /fico-site
+        run: |
+          find out -type f \( -name '*.html' -o -name '*.js' -o -name '*.css' -o -name '*.txt' \) -print0 |
+            xargs -0 sed -i -E 's#(["'"'"'`(])/(img|film|audio|og\.jpg|icon\.png|apple-icon\.png)#\1/fico-site/\2#g'
+      - run: touch out/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
