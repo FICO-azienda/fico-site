@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FICO — diagnostica cervo</title>
+<style>
+  :root { --avorio: #F1EEE5; --inchiostro: #23241f; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--avorio); color: var(--inchiostro);
+    font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; overflow: hidden; }
+  canvas { display: block; }
+
+  .pannello {
+    position: fixed; top: 14px; left: 14px; width: 268px; max-height: calc(100vh - 28px);
+    overflow: auto; background: rgba(255,255,255,.72); backdrop-filter: blur(8px);
+    border: 1px solid rgba(35,36,31,.16); padding: 12px 13px; z-index: 10;
+  }
+  .pannello h1 { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 10px; font-weight: 600; }
+  .pannello h2 { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; margin: 14px 0 6px;
+    font-weight: 600; opacity: .55; }
+  .riga { display: flex; justify-content: space-between; gap: 10px; padding: 1px 0; }
+  .riga span:last-child { text-align: right; opacity: .78; }
+  label { display: flex; align-items: center; gap: 7px; padding: 2px 0; cursor: pointer; }
+  input[type=checkbox] { accent-color: #4a5d3a; }
+  button {
+    font: inherit; width: 100%; text-align: left; background: transparent; color: inherit;
+    border: 1px solid rgba(35,36,31,.28); padding: 5px 8px; margin-bottom: 4px; cursor: pointer;
+  }
+  button:hover { background: rgba(35,36,31,.06); }
+  button.attivo { background: var(--inchiostro); color: var(--avorio); border-color: var(--inchiostro); }
+  .esito { margin-top: 12px; padding: 8px 9px; border: 1px solid; font-size: 11px; }
+  .esito.ok { border-color: #4a5d3a; color: #3b4a2e; background: rgba(74,93,58,.08); }
+  .esito.ko { border-color: #8a3324; color: #8a3324; background: rgba(138,51,36,.08); }
+  .nota { opacity: .5; margin-top: 10px; font-size: 10px; }
+</style>
+</head>
+<body>
+<div class="pannello">
+  <h1>Diagnostica cervo</h1>
+
+  <h2>Mostra</h2>
+  <label><input type="checkbox" id="cb-mesh" checked> mesh</label>
+  <label><input type="checkbox" id="cb-skeleton"> skeleton</label>
+  <label><input type="checkbox" id="cb-bbox"> bounding box</label>
+  <label><input type="checkbox" id="cb-assi"> assi X/Y/Z</label>
+  <label><input type="checkbox" id="cb-root"> root bone</label>
+  <label><input type="checkbox" id="cb-griglia"> piano di terra</label>
+
+  <h2>Modello</h2>
+  <div id="dati"></div>
+
+  <h2>Animazioni</h2>
+  <div id="pulsanti"></div>
+  <button id="btn-stop">— rest pose (nessuna clip) —</button>
+
+  <div id="esito"></div>
+  <p class="nota">Tabella completa delle clip nella console del browser.</p>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const AVORIO = 0xF1EEE5;
+const CLIP_TEST = ['Deer_Idle', 'A_WalkMedium_F', 'A_WalkSlow_F', 'A_Sitting_2', 'A_GrazingOnSpotB_1'];
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = false;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+document.body.appendChild(renderer.domElement);
+
+const scena = new THREE.Scene();
+scena.background = new THREE.Color(AVORIO);
+
+// camera fissa: nessun controllo orbitale, come richiesto
+const camera = new THREE.PerspectiveCamera(32, innerWidth / innerHeight, 0.1, 100);
+
+// luce morbida, da installazione: niente sole diretto duro
+scena.add(new THREE.HemisphereLight(0xffffff, 0xd8d2c4, 1.5));
+const chiave = new THREE.DirectionalLight(0xffffff, 1.1);
+chiave.position.set(2.5, 4, 3);
+scena.add(chiave);
+const controluce = new THREE.DirectionalLight(0xffffff, 0.45);
+controluce.position.set(-3, 2, -2.5);
+scena.add(controluce);
+
+const contenitore = new THREE.Group();   // la posizione globale vivra' qui, mai sulla root motion
+scena.add(contenitore);
+
+const aiuti = {};
+let mixer = null, azioneCorrente = null, clips = [], radice = null, orologio = new THREE.Clock();
+
+const el = (id) => document.getElementById(id);
+const righe = (coppie) => coppie.map(([k, v]) => `<div class="riga"><span>${k}</span><span>${v}</span></div>`).join('');
+const v3 = (v) => `${v.x.toFixed(2)}, ${v.y.toFixed(2)}, ${v.z.toFixed(2)}`;
+const gradi = (e) => `${THREE.MathUtils.radToDeg(e.x).toFixed(1)}°, ${THREE.MathUtils.radToDeg(e.y).toFixed(1)}°, ${THREE.MathUtils.radToDeg(e.z).toFixed(1)}°`;
+
+new GLTFLoader().load('deer.glb', (gltf) => {
+  radice = gltf.scene;
+  clips = gltf.animations;
+
+  // il modello e' in centimetri: lo porto a metri senza toccare ossa o rig
+  const scala = 0.01;
+  radice.scale.setScalar(scala);
+  contenitore.add(radice);
+
+  radice.traverse((o) => {
+    if (o.isMesh) {
+      o.frustumCulled = false;
+      o.material = new THREE.MeshStandardMaterial({ color: 0xEDE7DA, roughness: 0.72, metalness: 0.0 });
+    }
+  });
+
+  // --- misure sulla posa di riposo, senza alcuna clip attiva ---
+  radice.updateMatrixWorld(true);
+  const scatola = new THREE.Box3().setFromObject(radice);
+  const dim = scatola.getSize(new THREE.Vector3());
+  const centro = scatola.getCenter(new THREE.Vector3());
+
+  // camera inquadrata sul modello, poi fissa
+  const raggio = Math.max(dim.x, dim.y, dim.z);
+  // il cervo intero nell'inquadratura, spostato a destra: a sinistra c'e' il pannello
+  const mira = new THREE.Vector3(centro.x, centro.y * 0.92, centro.z);
+  camera.position.set(mira.x + raggio * 1.6, mira.y + raggio * 0.55, mira.z + raggio * 3.4);
+  camera.lookAt(mira);
+  camera.setViewOffset(innerWidth, innerHeight, -innerWidth * 0.14, 0, innerWidth, innerHeight);
+
+  // --- aiuti visivi, tutti spegnibili ---
+  aiuti.skeleton = new THREE.SkeletonHelper(radice);
+  aiuti.skeleton.material.linewidth = 1;
+  aiuti.bbox = new THREE.Box3Helper(scatola, 0x8a3324);
+  aiuti.assi = new THREE.AxesHelper(raggio * 0.9);
+  aiuti.griglia = new THREE.GridHelper(raggio * 3, 12, 0xbdb6a6, 0xd6d0c2);
+  aiuti.griglia.position.y = scatola.min.y;
+
+  let osso = null;
+  radice.traverse((o) => { if (o.isBone && !osso) osso = o; });
+  const rootBone = radice.getObjectByName('Root') || osso;
+  aiuti.root = new THREE.Mesh(
+    new THREE.SphereGeometry(raggio * 0.035, 16, 12),
+    new THREE.MeshBasicMaterial({ color: 0x8a3324 })
+  );
+
+  Object.values(aiuti).forEach((a) => { a.visible = false; scena.add(a); });
+
+  // --- pannello dati ---
+  const nodiPrincipali = [];
+  radice.children.forEach((c) => nodiPrincipali.push([c.name || '(senza nome)', v3(c.scale)]));
+
+  el('dati').innerHTML = righe([
+    ['scale modello', v3(radice.scale)],
+    ['rotation modello', gradi(radice.rotation)],
+    ['dimensioni (m)', `${dim.x.toFixed(2)} × ${dim.y.toFixed(2)} × ${dim.z.toFixed(2)}`],
+    ['centro (m)', v3(centro)],
+    ['appoggio Y (m)', scatola.min.y.toFixed(3)],
+    ['root bone', rootBone ? rootBone.name : 'assente'],
+    ['ossa', String(aiuti.skeleton.bones.length)],
+    ['clip', String(clips.length)]
+  ]) + '<h2>Scale nodi principali</h2>' + righe(nodiPrincipali);
+
+  // --- tabella clip in console ---
+  console.table(clips.map((c) => ({
+    'clip name': c.name,
+    'duration (s)': +c.duration.toFixed(3),
+    'tracks': c.tracks.length
+  })));
+
+  // --- controllo del bind: le ossa devono stare dentro la mesh ---
+  const ossaFuori = [];
+  const scatolaLarga = scatola.clone().expandByScalar(raggio * 0.04);
+  aiuti.skeleton.bones.forEach((b) => {
+    const p = b.getWorldPosition(new THREE.Vector3());
+    if (!scatolaLarga.containsPoint(p)) ossaFuori.push(b.name);
+  });
+
+  const caviglie = ['LegFRAnkle', 'LegFLAnkle', 'LegBLAnkle', 'LegBRAnkle']
+    .map((n) => radice.getObjectByName(n))
+    .filter(Boolean)
+    .map((b) => b.getWorldPosition(new THREE.Vector3()).y);
+  const dislivello = caviglie.length === 4 ? Math.max(...caviglie) - Math.min(...caviglie) : NaN;
+
+  const dorso = ['Pelvis', 'Chest'].map((n) => radice.getObjectByName(n))
+    .filter(Boolean).map((b) => b.getWorldPosition(new THREE.Vector3()).y);
+  const inclinazione = dorso.length === 2 ? Math.abs(dorso[0] - dorso[1]) : NaN;
+
+  const sano = ossaFuori.length === 0 && dislivello < dim.y * 0.12 && inclinazione < dim.y * 0.12;
+  el('esito').innerHTML = `<div class="esito ${sano ? 'ok' : 'ko'}">
+    <b>${sano ? 'Rest pose corretta' : 'Rest pose deformata'}</b><br>
+    ossa fuori dalla mesh: ${ossaFuori.length}${ossaFuori.length ? ' (' + ossaFuori.slice(0, 4).join(', ') + '…)' : ''}<br>
+    dislivello caviglie: ${(dislivello * 100).toFixed(1)} cm<br>
+    dislivello bacino/torace: ${(inclinazione * 100).toFixed(1)} cm
+  </div>`;
+  console.log(sano
+    ? '%cRest pose corretta: mesh e scheletro coerenti.'
+    : '%cRest pose deformata: il problema e\' nel rig, non nel frontend.',
+    `color:${sano ? '#3b4a2e' : '#8a3324'};font-weight:bold`);
+
+  if (rootBone) {
+    aiuti.rootBone = rootBone;
+    const p = rootBone.getWorldPosition(new THREE.Vector3());
+    aiuti.root.position.copy(p);
+  }
+
+  // --- animazioni: una sola clip per volta, crossfade morbido ---
+  mixer = new THREE.AnimationMixer(radice);
+  const perNome = new Map(clips.map((c) => [c.name, c]));
+
+  const cambia = (nome, bottone) => {
+    const clip = perNome.get(nome);
+    if (!clip) return;
+    const nuova = mixer.clipAction(clip);
+    if (azioneCorrente === nuova) return;
+    nuova.reset();
+    nuova.setLoop(THREE.LoopRepeat, Infinity);
+    nuova.enabled = true;
+    nuova.setEffectiveWeight(1);
+    if (azioneCorrente) {
+      azioneCorrente.crossFadeTo(nuova, 0.45, false);
+      nuova.play();
+    } else {
+      nuova.fadeIn(0.45).play();
+    }
+    azioneCorrente = nuova;
+    document.querySelectorAll('#pulsanti button').forEach((b) => b.classList.remove('attivo'));
+    if (bottone) bottone.classList.add('attivo');
+  };
+
+  const contenitorePulsanti = el('pulsanti');
+  CLIP_TEST.forEach((nome) => {
+    const b = document.createElement('button');
+    const clip = perNome.get(nome);
+    b.textContent = clip ? `${nome} · ${clip.duration.toFixed(1)}s` : `${nome} — ASSENTE`;
+    b.disabled = !clip;
+    b.onclick = () => cambia(nome, b);
+    contenitorePulsanti.appendChild(b);
+  });
+
+  el('btn-stop').onclick = () => {
+    if (azioneCorrente) { azioneCorrente.fadeOut(0.3); azioneCorrente = null; }
+    setTimeout(() => { mixer.stopAllAction(); radice.updateMatrixWorld(true); }, 320);
+    document.querySelectorAll('#pulsanti button').forEach((b) => b.classList.remove('attivo'));
+  };
+
+  // interruttori
+  el('cb-mesh').onchange = (e) => radice.traverse((o) => { if (o.isMesh) o.visible = e.target.checked; });
+  el('cb-skeleton').onchange = (e) => (aiuti.skeleton.visible = e.target.checked);
+  el('cb-bbox').onchange = (e) => (aiuti.bbox.visible = e.target.checked);
+  el('cb-assi').onchange = (e) => (aiuti.assi.visible = e.target.checked);
+  el('cb-root').onchange = (e) => (aiuti.root.visible = e.target.checked);
+  el('cb-griglia').onchange = (e) => (aiuti.griglia.visible = e.target.checked);
+
+  window.__diagnostica = { radice, clips, mixer, scatola, dim, ossaFuori, dislivello, inclinazione, sano };
+}, undefined, (err) => {
+  el('esito').innerHTML = `<div class="esito ko"><b>Caricamento fallito</b><br>${err?.message || err}</div>`;
+});
+
+// render loop: niente allocazioni, si ferma quando la scheda non e' visibile
+let attivo = true;
+document.addEventListener('visibilitychange', () => { attivo = !document.hidden; if (attivo) orologio.getDelta(); });
+
+function disegna() {
+  requestAnimationFrame(disegna);
+  if (!attivo) return;
+  const dt = orologio.getDelta();
+  if (mixer) mixer.update(dt);
+  if (aiuti.root && aiuti.rootBone && aiuti.root.visible) aiuti.rootBone.getWorldPosition(aiuti.root.position);
+  renderer.render(scena, camera);
+}
+disegna();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.setViewOffset(innerWidth, innerHeight, -innerWidth * 0.14, 0, innerWidth, innerHeight);
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
